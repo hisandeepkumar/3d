@@ -3,15 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>360 Depth Parallax Tool | Any Image</title>
+    <title>360 Depth Parallax | Reliable Upload</title>
     <style>
         * {
             box-sizing: border-box;
-            user-select: none;
         }
         body {
             background: #0a0f1c;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: system-ui, 'Segoe UI', sans-serif;
             margin: 0;
             padding: 20px;
             color: #eef2ff;
@@ -26,7 +25,6 @@
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            margin: 0 0 0.25rem 0;
         }
         .sub {
             color: #8d9ee0;
@@ -40,7 +38,7 @@
             gap: 24px;
             margin-bottom: 28px;
         }
-        .upload-box {
+        .upload-card {
             flex: 1;
             min-width: 240px;
             background: #111827dd;
@@ -48,9 +46,8 @@
             border-radius: 1.5rem;
             padding: 1.2rem;
             border: 1px solid #2e3a5e;
-            transition: 0.2s;
         }
-        .upload-box label {
+        .upload-card label {
             display: flex;
             align-items: center;
             justify-content: center;
@@ -62,11 +59,10 @@
             font-weight: 600;
             transition: 0.2s;
         }
-        .upload-box label:hover {
+        .upload-card label:hover {
             background: #2e3b66;
-            transform: scale(1.01);
         }
-        .upload-box input {
+        .upload-card input {
             display: none;
         }
         .preview {
@@ -78,7 +74,7 @@
             background: #00000066;
             border: 1px solid #4b5a82;
         }
-        .status-badge {
+        .status {
             font-size: 0.7rem;
             background: #0f172a;
             padding: 4px 10px;
@@ -156,42 +152,42 @@
 <body>
 <div class="container">
     <h1>🌀 DEPTH → 360° PARALLAX STUDIO</h1>
-    <div class="sub">Upload ANY image + depth map (white = near, black = far) → get real 3D motion photo</div>
+    <div class="sub">Upload ANY image + depth map (white = near, black = far) → real 3D motion photo</div>
 
     <div class="upload-row">
-        <div class="upload-box">
+        <div class="upload-card">
             <label for="origFile">📸 ORIGINAL IMAGE (any format)</label>
             <input type="file" id="origFile" accept="image/*">
             <img id="origPreview" class="preview" alt="original preview">
-            <div id="origStatus" class="status-badge">⚠️ waiting</div>
+            <div id="origStatus" class="status">⚠️ No image selected</div>
         </div>
-        <div class="upload-box">
+        <div class="upload-card">
             <label for="depthFile">🌑 DEPTH MAP (B&W, any format)</label>
             <input type="file" id="depthFile" accept="image/*">
             <img id="depthPreview" class="preview" alt="depth preview">
-            <div id="depthStatus" class="status-badge">⚠️ waiting</div>
+            <div id="depthStatus" class="status">⚠️ No depth map selected</div>
         </div>
     </div>
 
     <div class="controls">
         <div class="slider-group">
-            <label>🔆 DEPTH STRENGTH <span id="strengthVal">1.0</span></label>
-            <input type="range" id="depthStrength" min="0" max="2.2" step="0.01" value="1.0">
+            <label>🔆 DEPTH STRENGTH <span id="strengthVal">1.2</span></label>
+            <input type="range" id="depthStrength" min="0" max="2.2" step="0.01" value="1.2">
         </div>
         <div class="slider-group">
-            <label>🔘 MESH DETAIL <span id="detailVal">100</span></label>
-            <input type="range" id="meshDetail" min="40" max="160" step="5" value="100">
+            <label>🔘 MESH DETAIL <span id="detailVal">110</span></label>
+            <input type="range" id="meshDetail" min="40" max="160" step="5" value="110">
         </div>
         <button id="generateBtn" class="primary">🌟 GENERATE 3D PARALLAX</button>
-        <button id="exportBtn">💾 EXPORT AS HTML (360 photo)</button>
+        <button id="exportBtn">💾 EXPORT AS HTML</button>
     </div>
 
     <div class="viewer">
         <div id="canvas-container"></div>
     </div>
     <div class="info-note">
-        ✨ <strong>How to see effect:</strong> Drag mouse (desktop) OR tilt your phone → camera orbits around the scene.<br>
-        Depth map brightness moves parts of image forward/backward → creates true 3D motion parallax.
+        ✨ <strong>How to see effect:</strong> Drag mouse (desktop) OR tilt your phone → camera orbits.<br>
+        Depth map brightness moves image parts forward/backward → true 3D motion parallax.
     </div>
 </div>
 
@@ -223,84 +219,100 @@
     const exportBtn = document.getElementById('exportBtn');
     const container = document.getElementById('canvas-container');
 
-    // ----- state -----
-    let originalImgElement = null;   // HTMLImageElement
-    let depthImgElement = null;       // HTMLImageElement
+    // ----- State -----
+    let originalImageElement = null;   // HTMLImageElement
+    let depthImageElement = null;       // HTMLImageElement
     let currentScene = null, currentCamera = null, currentRenderer = null, currentControls = null;
     let animationId = null;
     let deviceOrientationHandler = null;
 
-    // helper: load image from file and return HTMLImageElement
+    // ----- Helper: load image from file and return HTMLImageElement using FileReader (most reliable) -----
     function loadImageFromFile(file) {
         return new Promise((resolve, reject) => {
-            if (!file) reject('No file');
-            const url = URL.createObjectURL(file);
-            const img = new Image();
-            img.crossOrigin = "Anonymous";
-            img.onload = () => {
-                URL.revokeObjectURL(url);
-                resolve(img);
+            if (!file) {
+                reject('No file');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    resolve(img);
+                };
+                img.onerror = (err) => {
+                    reject(err);
+                };
+                img.src = e.target.result;
             };
-            img.onerror = (err) => {
-                URL.revokeObjectURL(url);
+            reader.onerror = (err) => {
                 reject(err);
             };
-            img.src = url;
+            reader.readAsDataURL(file);
         });
     }
 
-    // update preview and status when original selected
+    // ----- Handle original image upload -----
     origFileInput.addEventListener('change', async (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        origStatus.textContent = '⏳ loading...';
+        
+        console.log('Original file selected:', file.name, file.type, file.size);
+        origStatus.textContent = '⏳ Loading image...';
+        origStatus.style.color = '#ffd966';
+        
         try {
+            // Show preview using FileReader
+            const previewReader = new FileReader();
+            previewReader.onload = (ev) => {
+                origPreview.src = ev.target.result;
+            };
+            previewReader.readAsDataURL(file);
+            
+            // Load full image element for 3D processing
             const img = await loadImageFromFile(file);
-            originalImgElement = img;
-            // show preview
-            const previewUrl = URL.createObjectURL(file);
-            origPreview.src = previewUrl;
-            origStatus.textContent = '✅ ready (' + file.type.split('/')[1] + ')';
+            originalImageElement = img;
+            origStatus.textContent = '✅ Ready (' + img.width + 'x' + img.height + ')';
             origStatus.style.color = '#a5f0a5';
+            console.log('Original image loaded successfully');
         } catch (err) {
-            console.error(err);
-            origStatus.textContent = '❌ failed to load';
-            originalImgElement = null;
+            console.error('Original image load error:', err);
+            origStatus.textContent = '❌ Failed to load';
+            origStatus.style.color = '#ffaaaa';
+            originalImageElement = null;
         }
-        checkAutoGenerate();
     });
 
+    // ----- Handle depth map upload -----
     depthFileInput.addEventListener('change', async (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        depthStatus.textContent = '⏳ loading depth...';
+        
+        console.log('Depth file selected:', file.name, file.type, file.size);
+        depthStatus.textContent = '⏳ Loading depth map...';
+        depthStatus.style.color = '#ffd966';
+        
         try {
+            // Preview
+            const previewReader = new FileReader();
+            previewReader.onload = (ev) => {
+                depthPreview.src = ev.target.result;
+            };
+            previewReader.readAsDataURL(file);
+            
             const img = await loadImageFromFile(file);
-            depthImgElement = img;
-            const previewUrl = URL.createObjectURL(file);
-            depthPreview.src = previewUrl;
-            depthStatus.textContent = '✅ depth ready';
+            depthImageElement = img;
+            depthStatus.textContent = '✅ Ready (' + img.width + 'x' + img.height + ')';
             depthStatus.style.color = '#a5f0a5';
+            console.log('Depth image loaded successfully');
         } catch (err) {
-            console.error(err);
-            depthStatus.textContent = '❌ invalid depth image';
-            depthImgElement = null;
+            console.error('Depth image load error:', err);
+            depthStatus.textContent = '❌ Failed to load';
+            depthStatus.style.color = '#ffaaaa';
+            depthImageElement = null;
         }
-        checkAutoGenerate();
     });
 
-    // auto generate when both images are present (with small delay)
-    let autoTimer = null;
-    function checkAutoGenerate() {
-        if (originalImgElement && depthImgElement) {
-            if (autoTimer) clearTimeout(autoTimer);
-            autoTimer = setTimeout(() => {
-                generateBtn.click();
-            }, 400);
-        }
-    }
-
-    // slider UI updates
+    // Slider display
     strengthSlider.addEventListener('input', () => {
         strengthSpan.textContent = strengthSlider.value;
     });
@@ -308,18 +320,18 @@
         detailSpan.textContent = detailSlider.value;
     });
 
-    // ---------- 3D GEOMETRY BUILDER ----------
+    // ---------- 3D Geometry Builder ----------
     async function buildDepthGeometry(origImg, depthImg, strength, segW) {
         const width = origImg.width;
         const height = origImg.height;
         
-        // resize depth map to exactly match original dimensions
+        // Resize depth map to exactly match original dimensions
         const canvas = document.createElement('canvas');
         canvas.width = width;
         canvas.height = height;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(depthImg, 0, 0, width, height);
-        const depthData = ctx.getImageData(0, 0, width, height).data; // RGBA
+        const depthData = ctx.getImageData(0, 0, width, height).data;
         
         const aspect = width / height;
         const planeWidth = 7.0;
@@ -355,15 +367,12 @@
         const geometry = await buildDepthGeometry(origImg, depthImg, strength, meshDetail);
         const texture = new THREE.Texture(origImg);
         texture.needsUpdate = true;
-        texture.wrapS = THREE.RepeatWrapping;
-        texture.wrapT = THREE.RepeatWrapping;
         
         const material = new THREE.MeshStandardMaterial({
             map: texture,
             roughness: 0.4,
             metalness: 0.05,
             side: THREE.DoubleSide,
-            emissive: 0x111111
         });
         const mesh = new THREE.Mesh(geometry, material);
         
@@ -386,7 +395,7 @@
         camera.position.set(0, 0.2, 10.5);
         camera.lookAt(0, 0, 0);
         
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(container.clientWidth, container.clientHeight);
         renderer.setPixelRatio(window.devicePixelRatio);
         
@@ -426,9 +435,7 @@
     function attachMotion(camera, controls, targetPos = new THREE.Vector3(0,0,0)) {
         if (deviceOrientationHandler) window.removeEventListener('deviceorientation', deviceOrientationHandler);
         const radius = 10.2;
-        let gyroActive = true;
         const handler = (event) => {
-            if (!gyroActive) return;
             let gamma = event.gamma || 0;
             let beta = event.beta || 0;
             gamma = Math.min(Math.max(gamma, -55), 55);
@@ -453,8 +460,8 @@
                     .then(response => {
                         if (response === 'granted') {
                             deviceOrientationHandler = attachMotion(camera, controls, targetPos);
-                            const promptDiv = document.getElementById('gyroHint');
-                            if (promptDiv) promptDiv.innerText = '✅ gyro active • tilt device';
+                            const hintDiv = document.getElementById('gyroHint');
+                            if (hintDiv) hintDiv.innerText = '✅ gyro active • tilt device';
                         }
                     })
                     .catch(e => console.log);
@@ -484,18 +491,23 @@
 
     // ----- GENERATE 3D PREVIEW -----
     async function generatePreview() {
-        if (!originalImgElement || !depthImgElement) {
-            alert("❌ Please upload BOTH the original image AND the depth map first.");
+        if (!originalImageElement || !depthImageElement) {
+            alert("❌ Please upload BOTH the original image AND the depth map first.\n\nStatus:\n- Original: " + (originalImageElement ? '✅' : '❌') + "\n- Depth map: " + (depthImageElement ? '✅' : '❌'));
             return;
         }
-        generateBtn.textContent = "🔄 building 3D mesh...";
+        
+        generateBtn.textContent = "🔄 Building 3D mesh...";
         generateBtn.disabled = true;
+        
         try {
             cleanupScene();
             const strength = parseFloat(strengthSlider.value);
             const detail = parseInt(detailSlider.value);
+            
+            console.log('Generating with strength:', strength, 'detail:', detail);
+            
             const { scene, camera, renderer, controls } = await createParallaxScene(
-                originalImgElement, depthImgElement, strength, detail
+                originalImageElement, depthImageElement, strength, detail
             );
             currentScene = scene;
             currentCamera = camera;
@@ -520,7 +532,7 @@
             generateBtn.textContent = "✨ REGENERATE";
             generateBtn.disabled = false;
         } catch (err) {
-            console.error(err);
+            console.error('Generation error:', err);
             alert("Error generating 3D: " + err.message);
             generateBtn.textContent = "⚠️ RETRY";
             generateBtn.disabled = false;
@@ -529,25 +541,26 @@
     
     generateBtn.addEventListener('click', generatePreview);
     
-    // ----- EXPORT standalone HTML (embeds images as base64) -----
+    // ----- EXPORT standalone HTML -----
     async function exportStandalone() {
-        if (!originalImgElement || !depthImgElement) {
+        if (!originalImageElement || !depthImageElement) {
             alert("Both images required for export.");
             return;
         }
-        // convert images to base64
+        
+        // Convert images to base64
         const origCanvas = document.createElement('canvas');
-        origCanvas.width = originalImgElement.width;
-        origCanvas.height = originalImgElement.height;
+        origCanvas.width = originalImageElement.width;
+        origCanvas.height = originalImageElement.height;
         const origCtx = origCanvas.getContext('2d');
-        origCtx.drawImage(originalImgElement, 0, 0);
+        origCtx.drawImage(originalImageElement, 0, 0);
         const origBase64 = origCanvas.toDataURL('image/jpeg', 0.92);
         
         const depthCanvas = document.createElement('canvas');
-        depthCanvas.width = depthImgElement.width;
-        depthCanvas.height = depthImgElement.height;
+        depthCanvas.width = depthImageElement.width;
+        depthCanvas.height = depthImageElement.height;
         const depthCtx = depthCanvas.getContext('2d');
-        depthCtx.drawImage(depthImgElement, 0, 0);
+        depthCtx.drawImage(depthImageElement, 0, 0);
         const depthBase64 = depthCanvas.toDataURL('image/png');
         
         const strength = strengthSlider.value;
@@ -597,7 +610,7 @@ if(typeof DeviceOrientationEvent!=='undefined' && typeof DeviceOrientationEvent.
     
     exportBtn.addEventListener('click', exportStandalone);
     
-    // handle resize of container
+    // Resize handler
     const resizeObserver = new ResizeObserver(() => {
         if (currentCamera && currentRenderer) {
             const w = container.clientWidth;
@@ -609,10 +622,11 @@ if(typeof DeviceOrientationEvent!=='undefined' && typeof DeviceOrientationEvent.
     });
     resizeObserver.observe(container);
     
-    // initial values
+    // Initial values
     strengthSpan.textContent = strengthSlider.value;
     detailSpan.textContent = detailSlider.value;
-    console.log("✅ Tool ready — upload any image, depth map, press generate");
+    
+    console.log("✅ Tool ready — upload images using the buttons above.");
 </script>
 </body>
 </html>
