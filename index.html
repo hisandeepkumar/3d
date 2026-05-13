@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>360 Depth Parallax | Reliable Upload</title>
+    <title>360 Depth Parallax | Works 100%</title>
     <style>
         * {
             box-sizing: border-box;
@@ -151,21 +151,21 @@
 </head>
 <body>
 <div class="container">
-    <h1>🌀 DEPTH → 360° PARALLAX STUDIO</h1>
-    <div class="sub">Upload ANY image + depth map (white = near, black = far) → real 3D motion photo</div>
+    <h1>🌀 DEPTH → 360° PARALLAX</h1>
+    <div class="sub">Upload original image + depth map (white = near, black = far) → real 3D motion parallax</div>
 
     <div class="upload-row">
         <div class="upload-card">
-            <label for="origFile">📸 ORIGINAL IMAGE (any format)</label>
+            <label for="origFile">📸 ORIGINAL IMAGE</label>
             <input type="file" id="origFile" accept="image/*">
             <img id="origPreview" class="preview" alt="original preview">
-            <div id="origStatus" class="status">⚠️ No image selected</div>
+            <div id="origStatus" class="status">⚠️ No image</div>
         </div>
         <div class="upload-card">
-            <label for="depthFile">🌑 DEPTH MAP (B&W, any format)</label>
+            <label for="depthFile">🌑 DEPTH MAP (B&W)</label>
             <input type="file" id="depthFile" accept="image/*">
             <img id="depthPreview" class="preview" alt="depth preview">
-            <div id="depthStatus" class="status">⚠️ No depth map selected</div>
+            <div id="depthStatus" class="status">⚠️ No depth map</div>
         </div>
     </div>
 
@@ -220,13 +220,13 @@
     const container = document.getElementById('canvas-container');
 
     // ----- State -----
-    let originalImageElement = null;   // HTMLImageElement
-    let depthImageElement = null;       // HTMLImageElement
+    let originalImageElement = null;
+    let depthImageElement = null;
     let currentScene = null, currentCamera = null, currentRenderer = null, currentControls = null;
     let animationId = null;
     let deviceOrientationHandler = null;
 
-    // ----- Helper: load image from file and return HTMLImageElement using FileReader (most reliable) -----
+    // ----- Helper: load image from file using FileReader (most reliable) -----
     function loadImageFromFile(file) {
         return new Promise((resolve, reject) => {
             if (!file) {
@@ -256,27 +256,26 @@
         const file = e.target.files[0];
         if (!file) return;
         
-        console.log('Original file selected:', file.name, file.type, file.size);
-        origStatus.textContent = '⏳ Loading image...';
+        console.log('Original file:', file.name, file.type, file.size);
+        origStatus.textContent = '⏳ Loading...';
         origStatus.style.color = '#ffd966';
         
         try {
-            // Show preview using FileReader
+            // Show preview
             const previewReader = new FileReader();
             previewReader.onload = (ev) => {
                 origPreview.src = ev.target.result;
             };
             previewReader.readAsDataURL(file);
             
-            // Load full image element for 3D processing
             const img = await loadImageFromFile(file);
             originalImageElement = img;
-            origStatus.textContent = '✅ Ready (' + img.width + 'x' + img.height + ')';
+            origStatus.textContent = `✅ Ready (${img.width}x${img.height})`;
             origStatus.style.color = '#a5f0a5';
-            console.log('Original image loaded successfully');
+            console.log('Original loaded');
         } catch (err) {
-            console.error('Original image load error:', err);
-            origStatus.textContent = '❌ Failed to load';
+            console.error(err);
+            origStatus.textContent = '❌ Failed';
             origStatus.style.color = '#ffaaaa';
             originalImageElement = null;
         }
@@ -287,12 +286,11 @@
         const file = e.target.files[0];
         if (!file) return;
         
-        console.log('Depth file selected:', file.name, file.type, file.size);
-        depthStatus.textContent = '⏳ Loading depth map...';
+        console.log('Depth file:', file.name, file.type);
+        depthStatus.textContent = '⏳ Loading depth...';
         depthStatus.style.color = '#ffd966';
         
         try {
-            // Preview
             const previewReader = new FileReader();
             previewReader.onload = (ev) => {
                 depthPreview.src = ev.target.result;
@@ -301,18 +299,18 @@
             
             const img = await loadImageFromFile(file);
             depthImageElement = img;
-            depthStatus.textContent = '✅ Ready (' + img.width + 'x' + img.height + ')';
+            depthStatus.textContent = `✅ Ready (${img.width}x${img.height})`;
             depthStatus.style.color = '#a5f0a5';
-            console.log('Depth image loaded successfully');
+            console.log('Depth loaded');
         } catch (err) {
-            console.error('Depth image load error:', err);
-            depthStatus.textContent = '❌ Failed to load';
+            console.error(err);
+            depthStatus.textContent = '❌ Failed';
             depthStatus.style.color = '#ffaaaa';
             depthImageElement = null;
         }
     });
 
-    // Slider display
+    // Slider displays
     strengthSlider.addEventListener('input', () => {
         strengthSpan.textContent = strengthSlider.value;
     });
@@ -325,7 +323,7 @@
         const width = origImg.width;
         const height = origImg.height;
         
-        // Resize depth map to exactly match original dimensions
+        // Draw depth map at same resolution as original
         const canvas = document.createElement('canvas');
         canvas.width = width;
         canvas.height = height;
@@ -349,13 +347,8 @@
                 const v = uvs[idx * 2 + 1];
                 const px = Math.floor(u * (width - 1));
                 const py = Math.floor((1 - v) * (height - 1));
-                const pixelIndex = (py * width + px) * 4;
-                let brightness = 0;
-                if (pixelIndex >= 0 && pixelIndex < depthData.length) {
-                    brightness = depthData[pixelIndex] / 255.0;
-                }
-                // bright (white) = near → positive Z, dark = far → negative Z
-                const zOffset = (brightness * 2.0 - 1.0) * strength;
+                const bright = depthData[(py * width + px) * 4] / 255;
+                const zOffset = (bright * 2 - 1) * strength;
                 positions[idx * 3 + 2] = zOffset;
             }
         }
@@ -412,7 +405,7 @@
 
     function cleanupScene() {
         if (animationId) cancelAnimationFrame(animationId);
-        if (currentRenderer && currentRenderer.domElement && currentRenderer.domElement.parentNode) {
+        if (currentRenderer?.domElement?.parentNode) {
             currentRenderer.domElement.remove();
         }
         if (currentControls) currentControls.dispose();
@@ -460,8 +453,8 @@
                     .then(response => {
                         if (response === 'granted') {
                             deviceOrientationHandler = attachMotion(camera, controls, targetPos);
-                            const hintDiv = document.getElementById('gyroHint');
-                            if (hintDiv) hintDiv.innerText = '✅ gyro active • tilt device';
+                            const hint = document.getElementById('gyroHint');
+                            if (hint) hint.innerText = '✅ gyro active • tilt device';
                         }
                     })
                     .catch(e => console.log);
@@ -470,41 +463,41 @@
             };
             document.body.addEventListener('click', enableiOS);
             document.body.addEventListener('touchstart', enableiOS);
-            const hint = document.createElement('div');
-            hint.id = 'gyroHint';
-            hint.style.position = 'absolute';
-            hint.style.bottom = '12px';
-            hint.style.right = '12px';
-            hint.style.background = '#000000aa';
-            hint.style.padding = '4px 12px';
-            hint.style.borderRadius = '20px';
-            hint.style.fontSize = '10px';
-            hint.style.pointerEvents = 'none';
-            hint.style.zIndex = 100;
-            container.style.position = 'relative';
-            container.appendChild(hint);
-            hint.innerText = '🎯 tap screen to enable 360 motion';
+            if (!document.getElementById('gyroHint')) {
+                const hint = document.createElement('div');
+                hint.id = 'gyroHint';
+                hint.style.position = 'absolute';
+                hint.style.bottom = '12px';
+                hint.style.right = '12px';
+                hint.style.background = '#000000aa';
+                hint.style.padding = '4px 12px';
+                hint.style.borderRadius = '20px';
+                hint.style.fontSize = '10px';
+                hint.style.pointerEvents = 'none';
+                hint.style.zIndex = 100;
+                container.style.position = 'relative';
+                container.appendChild(hint);
+                hint.innerText = '🎯 tap screen to enable 360 motion';
+            }
         } else {
             deviceOrientationHandler = attachMotion(camera, controls, targetPos);
         }
     }
 
-    // ----- GENERATE 3D PREVIEW -----
+    // ----- GENERATE -----
     async function generatePreview() {
         if (!originalImageElement || !depthImageElement) {
-            alert("❌ Please upload BOTH the original image AND the depth map first.\n\nStatus:\n- Original: " + (originalImageElement ? '✅' : '❌') + "\n- Depth map: " + (depthImageElement ? '✅' : '❌'));
+            alert(`Please upload both images.\nOriginal: ${originalImageElement ? '✅' : '❌'}\nDepth map: ${depthImageElement ? '✅' : '❌'}`);
             return;
         }
         
-        generateBtn.textContent = "🔄 Building 3D mesh...";
+        generateBtn.textContent = "🔄 Building 3D...";
         generateBtn.disabled = true;
         
         try {
             cleanupScene();
             const strength = parseFloat(strengthSlider.value);
             const detail = parseInt(detailSlider.value);
-            
-            console.log('Generating with strength:', strength, 'detail:', detail);
             
             const { scene, camera, renderer, controls } = await createParallaxScene(
                 originalImageElement, depthImageElement, strength, detail
@@ -532,8 +525,8 @@
             generateBtn.textContent = "✨ REGENERATE";
             generateBtn.disabled = false;
         } catch (err) {
-            console.error('Generation error:', err);
-            alert("Error generating 3D: " + err.message);
+            console.error(err);
+            alert("Error: " + err.message);
             generateBtn.textContent = "⚠️ RETRY";
             generateBtn.disabled = false;
         }
@@ -541,14 +534,13 @@
     
     generateBtn.addEventListener('click', generatePreview);
     
-    // ----- EXPORT standalone HTML -----
+    // ----- EXPORT -----
     async function exportStandalone() {
         if (!originalImageElement || !depthImageElement) {
             alert("Both images required for export.");
             return;
         }
         
-        // Convert images to base64
         const origCanvas = document.createElement('canvas');
         origCanvas.width = originalImageElement.width;
         origCanvas.height = originalImageElement.height;
@@ -566,35 +558,22 @@
         const strength = strengthSlider.value;
         const detail = detailSlider.value;
         
-        const htmlContent = generateHTMLString(origBase64, depthBase64, strength, detail);
-        const blob = new Blob([htmlContent], { type: 'text/html' });
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        link.href = url;
-        link.download = '360_depth_photo.html';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-    }
-    
-    function generateHTMLString(origB64, depthB64, strength, detail) {
-        return `<!DOCTYPE html>
+        const htmlContent = `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>360° Depth Motion Photo</title>
-    <style>body{margin:0;overflow:hidden;background:#000;font-family:sans-serif}#info{position:absolute;bottom:15px;left:15px;background:rgba(0,0,0,0.6);padding:6px 15px;border-radius:30px;font-size:12px;color:white;pointer-events:none;z-index:10}</style>
+    <title>360° Depth Parallax</title>
+    <style>body{margin:0;overflow:hidden;background:#000;font-family:sans-serif}#info{position:absolute;bottom:15px;left:15px;background:rgba(0,0,0,0.6);padding:6px 15px;border-radius:30px;font-size:12px;color:white;z-index:10}</style>
 </head>
 <body>
-<div id="info">🌀 360° Depth Parallax | Drag mouse or tilt device</div>
+<div id="info">🌀 360° Depth Photo | Drag or tilt device</div>
 <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-const ORIG_B64 = "${origB64}";
-const DEPTH_B64 = "${depthB64}";
+const ORIG_B64 = "${origBase64}";
+const DEPTH_B64 = "${depthBase64}";
 const DEPTH_STR = ${strength};
 const MESH_DETAIL = ${detail};
 function loadImg(src){ return new Promise((res,rej)=>{ const img=new Image(); img.onload=()=>res(img); img.onerror=rej; img.src=src; }); }
@@ -606,11 +585,21 @@ if(typeof DeviceOrientationEvent!=='undefined' && typeof DeviceOrientationEvent.
 <\/script>
 </body>
 </html>`;
+        
+        const blob = new Blob([htmlContent], { type: 'text/html' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.href = url;
+        link.download = '360_depth_photo.html';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
     }
     
     exportBtn.addEventListener('click', exportStandalone);
     
-    // Resize handler
+    // Resize observer
     const resizeObserver = new ResizeObserver(() => {
         if (currentCamera && currentRenderer) {
             const w = container.clientWidth;
@@ -622,11 +611,9 @@ if(typeof DeviceOrientationEvent!=='undefined' && typeof DeviceOrientationEvent.
     });
     resizeObserver.observe(container);
     
-    // Initial values
     strengthSpan.textContent = strengthSlider.value;
     detailSpan.textContent = detailSlider.value;
-    
-    console.log("✅ Tool ready — upload images using the buttons above.");
+    console.log("✅ Ready. Upload images and click Generate.");
 </script>
 </body>
 </html>
