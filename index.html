@@ -1,1 +1,772 @@
-g
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>3D Depth to 360 Photo Tool | Motion Parallax</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0f1e;
+            color: #eef4ff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            width: 100%;
+            background: rgba(20, 28, 40, 0.8);
+            backdrop-filter: blur(2px);
+            border-radius: 2rem;
+            padding: 1.5rem;
+            box-shadow: 0 25px 45px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        h1 {
+            font-size: 1.6rem;
+            margin: 0 0 0.25rem 0;
+            background: linear-gradient(135deg, #fff, #9aaef0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .sub {
+            font-size: 0.85rem;
+            opacity: 0.7;
+            margin-bottom: 1.5rem;
+        }
+        .upload-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 1.8rem;
+        }
+        .upload-card {
+            flex: 1;
+            min-width: 200px;
+            background: #111827;
+            border-radius: 1.2rem;
+            padding: 1rem;
+            text-align: center;
+            border: 1px solid #2d3748;
+        }
+        .upload-card label {
+            display: block;
+            background: #1f2a3e;
+            padding: 0.6rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+        .upload-card label:hover {
+            background: #2d3a54;
+        }
+        .upload-card input {
+            display: none;
+        }
+        .preview-img {
+            width: 100%;
+            max-height: 180px;
+            object-fit: contain;
+            margin-top: 12px;
+            border-radius: 12px;
+            background: #00000044;
+            border: 1px solid #334155;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.2rem;
+            margin-bottom: 1.5rem;
+            align-items: center;
+            background: #0f172a;
+            padding: 1rem;
+            border-radius: 1.2rem;
+        }
+        .slider-group {
+            flex: 1;
+            min-width: 150px;
+        }
+        .slider-group label {
+            font-size: 0.8rem;
+            display: block;
+            margin-bottom: 6px;
+        }
+        input[type="range"] {
+            width: 100%;
+            background: #2d3a5e;
+            height: 4px;
+            border-radius: 5px;
+        }
+        button {
+            background: #3b4b7a;
+            border: none;
+            padding: 0.6rem 1.4rem;
+            border-radius: 2rem;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        button.primary {
+            background: #4f7df3;
+            box-shadow: 0 4px 12px rgba(79,125,243,0.3);
+        }
+        button.primary:hover {
+            background: #6a92ff;
+            transform: scale(1.02);
+        }
+        .viewer-area {
+            background: #03060c;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            aspect-ratio: 16 / 9;
+            position: relative;
+            border: 1px solid #2d3748;
+            margin-top: 10px;
+        }
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        .info-note {
+            font-size: 0.75rem;
+            margin-top: 12px;
+            text-align: center;
+            background: #0f172a80;
+            padding: 8px;
+            border-radius: 1rem;
+        }
+        .flex-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        @media (max-width: 700px) {
+            .container { padding: 1rem; }
+            .controls { flex-direction: column; align-items: stretch; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🌀 Depth → 360 Motion Photo Tool</h1>
+    <div class="sub">Upload Image + Depth Map (White = Near, Black = Far) | Preview + Export as HTML with gyro/mouse parallax</div>
+
+    <div class="upload-grid">
+        <div class="upload-card">
+            <label for="originalInput">📸 ORIGINAL IMAGE</label>
+            <input type="file" id="originalInput" accept="image/jpeg,image/png,image/webp">
+            <img id="originalPreview" class="preview-img" alt="preview original">
+        </div>
+        <div class="upload-card">
+            <label for="depthInput">🌓 DEPTH MAP (B&W)</label>
+            <input type="file" id="depthInput" accept="image/jpeg,image/png,image/webp">
+            <img id="depthPreview" class="preview-img" alt="depth map preview">
+        </div>
+    </div>
+
+    <div class="controls">
+        <div class="slider-group">
+            <label>⚡ DEPTH STRENGTH: <span id="strengthVal">1.2</span></label>
+            <input type="range" id="depthStrength" min="0" max="2.5" step="0.01" value="1.2">
+        </div>
+        <div class="slider-group">
+            <label>🔘 MESH QUALITY: <span id="gridVal">120</span></label>
+            <input type="range" id="gridRes" min="40" max="180" step="5" value="120">
+        </div>
+        <div class="flex-row">
+            <button id="generateBtn" class="primary">✨ GENERATE 3D PREVIEW</button>
+            <button id="exportBtn">📦 EXPORT AS 360 HTML</button>
+        </div>
+    </div>
+
+    <div class="viewer-area">
+        <div id="canvas-container"></div>
+    </div>
+    <div class="info-note">
+        📱 <strong>360 Motion Photo:</strong> On mobile, tilt your device → camera rotates around the 3D scene. On desktop, drag mouse to orbit. 
+        Depth map (bright = closer) displaces geometry, creating true 3D parallax effect.
+    </div>
+</div>
+
+<!-- Three.js core and add-ons -->
+<script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+        }
+    }
+</script>
+
+<script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    
+    // ----- DOM elements -----
+    const originalInput = document.getElementById('originalInput');
+    const depthInput = document.getElementById('depthInput');
+    const originalPreview = document.getElementById('originalPreview');
+    const depthPreview = document.getElementById('depthPreview');
+    const depthStrengthSlider = document.getElementById('depthStrength');
+    const strengthVal = document.getElementById('strengthVal');
+    const gridResSlider = document.getElementById('gridRes');
+    const gridVal = document.getElementById('gridVal');
+    const generateBtn = document.getElementById('generateBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const container = document.getElementById('canvas-container');
+    
+    // state
+    let currentScene = null;
+    let currentCamera = null;
+    let currentRenderer = null;
+    let currentControls = null;
+    let currentMesh = null;
+    let animationId = null;
+    let originalImageBlob = null;
+    let depthImageBlob = null;
+    let originalImageUrl = null;
+    let depthImageUrl = null;
+    let useDeviceOrientation = false;
+    let deviceOrientationListener = null;
+    let orbitCtrl = null;
+    
+    // Helper: load image as blob URL / dataURL
+    function getImageDataURL(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    }
+    
+    // resize depth map to match original dimensions and return pixel data & canvas
+    async function resizeDepthToMatch(originalImg, depthImg) {
+        const width = originalImg.width;
+        const height = originalImg.height;
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(depthImg, 0, 0, width, height);
+        const imgData = ctx.getImageData(0, 0, width, height);
+        return { width, height, data: imgData.data, canvas };
+    }
+    
+    // Build displaced geometry from depth map
+    function buildDisplacedGeometry(originalImage, depthImageData, depthWidth, depthHeight, segmentsW, segmentsH, strength) {
+        // plane geometry with given segments
+        const aspect = originalImage.width / originalImage.height;
+        const planeWidth = 8.0;
+        const planeHeight = planeWidth / aspect;
+        
+        const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight, segmentsW, segmentsH);
+        const positions = geometry.attributes.position.array;
+        const uvs = geometry.attributes.uv.array;
+        
+        // modify Z based on depth map
+        for (let i = 0; i <= segmentsH; i++) {
+            for (let j = 0; j <= segmentsW; j++) {
+                const idx = i * (segmentsW + 1) + j;
+                const u = uvs[idx * 2];
+                const v = uvs[idx * 2 + 1];
+                // map uv to depth pixel coordinate
+                const px = Math.floor(u * (depthWidth - 1));
+                const py = Math.floor((1 - v) * (depthHeight - 1));
+                const pixelIndex = (py * depthWidth + px) * 4;
+                let brightness = 0;
+                if (pixelIndex >= 0 && pixelIndex < depthImageData.length) {
+                    // grayscale from R channel (depth map is B&W)
+                    brightness = depthImageData[pixelIndex] / 255.0;
+                }
+                // Map: white (1) = maximum positive Z (near), black (0) = negative Z (far)
+                const zOffset = (brightness * 2.0 - 1.0) * strength;
+                positions[idx * 3 + 2] = zOffset;
+            }
+        }
+        geometry.computeVertexNormals(); // for lighting
+        geometry.attributes.position.needsUpdate = true;
+        return geometry;
+    }
+    
+    // Create Three scene with texture and geometry
+    async function create3DScene(originalImg, depthImg, strength, segmentsVal) {
+        return new Promise(async (resolve) => {
+            // resize depth to original dimensions and get data
+            const { width, height, data: depthData } = await resizeDepthToMatch(originalImg, depthImg);
+            const segmentsW = segmentsVal;
+            const segmentsH = Math.floor(segmentsVal * (originalImg.height / originalImg.width));
+            const geometry = buildDisplacedGeometry(originalImg, depthData, width, height, segmentsW, segmentsH, strength);
+            
+            // texture from original image
+            const texture = new THREE.Texture(originalImg);
+            texture.needsUpdate = true;
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.RepeatWrapping;
+            
+            const material = new THREE.MeshStandardMaterial({
+                map: texture,
+                roughness: 0.4,
+                metalness: 0.1,
+                side: THREE.DoubleSide,
+                emissive: 0x000000
+            });
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.castShadow = true;
+            mesh.receiveShadow = false;
+            
+            // setup scene
+            const scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x03060c);
+            scene.fog = new THREE.FogExp2(0x03060c, 0.008);
+            
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0x404060);
+            scene.add(ambientLight);
+            const mainLight = new THREE.DirectionalLight(0xffffff, 1.2);
+            mainLight.position.set(5, 8, 7);
+            mainLight.castShadow = false;
+            scene.add(mainLight);
+            const fillLight = new THREE.PointLight(0x556688, 0.5);
+            fillLight.position.set(-3, 2, 4);
+            scene.add(fillLight);
+            const backLight = new THREE.PointLight(0xffaa66, 0.3);
+            backLight.position.set(0, 0, -5);
+            scene.add(backLight);
+            
+            scene.add(mesh);
+            
+            // Camera: perspective
+            const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(0, 0, 12);
+            camera.lookAt(0, 0, 0);
+            
+            // Renderer
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            
+            // OrbitControls with auto-rotate off, but we will also manage device orientation
+            const controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.rotateSpeed = 1.2;
+            controls.enableZoom = true;
+            controls.zoomSpeed = 0.8;
+            controls.enablePan = false;
+            controls.target.set(0, 0, 0);
+            
+            // for device orientation we will override camera position relative to target
+            // but we want to keep orbit controls optional, we'll mix: if device orientation enabled, disable orbit auto update and use custom orientation.
+            // we set up listener later.
+            
+            resolve({ scene, camera, renderer, mesh, controls });
+        });
+    }
+    
+    // clean previous scene
+    function disposeScene() {
+        if (animationId) cancelAnimationFrame(animationId);
+        if (currentRenderer && currentRenderer.domElement) {
+            if (currentRenderer.domElement.parentNode) currentRenderer.domElement.parentNode.removeChild(currentRenderer.domElement);
+        }
+        if (currentControls) currentControls.dispose();
+        if (currentScene) {
+            currentScene.traverse(obj => {
+                if (obj.isMesh) {
+                    obj.geometry.dispose();
+                    if (obj.material) obj.material.dispose();
+                }
+            });
+        }
+        if (deviceOrientationListener) {
+            window.removeEventListener('deviceorientation', deviceOrientationListener);
+            deviceOrientationListener = null;
+        }
+        if (currentRenderer) currentRenderer.dispose();
+    }
+    
+    // Apply device orientation to camera (relative to center)
+    function initDeviceOrientation(camera, controls, targetPos = new THREE.Vector3(0,0,0)) {
+        if (deviceOrientationListener) window.removeEventListener('deviceorientation', deviceOrientationListener);
+        const radius = 11.5;
+        let gamma = 0; // left-right
+        let beta = 0;  // front-back
+        const listener = (event) => {
+            // gamma: -90 to 90, beta: -90 to 90
+            if (event.gamma !== null) gamma = event.gamma;
+            if (event.beta !== null) beta = event.beta;
+            // limit angles to avoid disorientation
+            const limitedGamma = Math.min(Math.max(gamma, -55), 55);
+            const limitedBeta = Math.min(Math.max(beta, -40), 40);
+            // convert to radians
+            const theta = (limitedGamma * Math.PI) / 180;
+            const phi = (limitedBeta * Math.PI) / 180;
+            const x = radius * Math.sin(theta) * Math.cos(phi);
+            const y = radius * Math.sin(phi);
+            const z = radius * Math.cos(theta) * Math.cos(phi);
+            camera.position.set(x, y, z);
+            camera.lookAt(targetPos);
+            // if orbit controls present, update target but we don't want conflict
+            if (controls && controls.target) controls.target.copy(targetPos);
+        };
+        window.addEventListener('deviceorientation', listener);
+        return listener;
+    }
+    
+    // Main generate function
+    async function generatePreview() {
+        if (!originalImageBlob || !depthImageBlob) {
+            alert("❌ Please upload BOTH original image AND depth map first.");
+            return;
+        }
+        // load images as HTMLImageElement
+        const origImg = await loadImageFromBlob(originalImageBlob);
+        const depthImg = await loadImageFromBlob(depthImageBlob);
+        
+        const strength = parseFloat(depthStrengthSlider.value);
+        const gridRes = parseInt(gridResSlider.value);
+        
+        // show loading
+        generateBtn.textContent = "🔄 Building 3D...";
+        generateBtn.disabled = true;
+        
+        try {
+            disposeScene();
+            const { scene, camera, renderer, mesh, controls } = await create3DScene(origImg, depthImg, strength, gridRes);
+            currentScene = scene;
+            currentCamera = camera;
+            currentRenderer = renderer;
+            currentControls = controls;
+            currentMesh = mesh;
+            
+            container.innerHTML = '';
+            container.appendChild(renderer.domElement);
+            
+            // Setup device orientation or fallback
+            let orientationHandler = null;
+            const targetCenter = new THREE.Vector3(0,0,0);
+            // request permission for iOS
+            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                // iOS need user interaction, we will add a temporary overlay but we can just not auto request, instruction given
+                // but we add a small button for gyro? Better to not force, but we add click listener on canvas
+                const enableGyro = () => {
+                    DeviceOrientationEvent.requestPermission()
+                        .then(response => {
+                            if (response === 'granted') {
+                                orientationHandler = initDeviceOrientation(camera, controls, targetCenter);
+                                deviceOrientationListener = orientationHandler;
+                                alert("✅ Motion enabled! Tilt device to see 360 effect.");
+                            }
+                        }).catch(err => console.warn);
+                    document.removeEventListener('click', enableGyro);
+                    document.removeEventListener('touchstart', enableGyro);
+                };
+                document.addEventListener('click', enableGyro);
+                document.addEventListener('touchstart', enableGyro);
+                // show hint
+                const hint = document.createElement('div');
+                hint.innerText = "🎯 Tap screen to enable motion sensor (360 tilt)";
+                hint.style.position = "absolute"; hint.style.bottom = "10px"; hint.style.left = "10px";
+                hint.style.background = "#000000aa"; hint.style.padding = "4px 12px"; hint.style.borderRadius = "20px"; hint.style.fontSize = "11px";
+                hint.style.pointerEvents = "none"; hint.style.zIndex = 100;
+                renderer.domElement.parentNode.style.position = "relative";
+                renderer.domElement.parentNode.appendChild(hint);
+                setTimeout(() => hint.remove(), 4000);
+            } else {
+                // Android / desktop, just enable
+                orientationHandler = initDeviceOrientation(camera, controls, targetCenter);
+                deviceOrientationListener = orientationHandler;
+            }
+            
+            function animate() {
+                animationId = requestAnimationFrame(animate);
+                if (currentControls && !useDeviceOrientation) currentControls.update();
+                if (currentRenderer && currentScene && currentCamera) {
+                    currentRenderer.render(currentScene, currentCamera);
+                }
+            }
+            animate();
+            
+            generateBtn.textContent = "✨ REGENERATE";
+            generateBtn.disabled = false;
+        } catch (err) {
+            console.error(err);
+            alert("Error generating 3D: " + err.message);
+            generateBtn.textContent = "⚠️ RETRY";
+            generateBtn.disabled = false;
+        }
+    }
+    
+    function loadImageFromBlob(blob) {
+        return new Promise((resolve, reject) => {
+            const url = URL.createObjectURL(blob);
+            const img = new Image();
+            img.crossOrigin = "Anonymous";
+            img.onload = () => {
+                URL.revokeObjectURL(url);
+                resolve(img);
+            };
+            img.onerror = (e) => reject(e);
+            img.src = url;
+        });
+    }
+    
+    // Helper to get blob from file input
+    function handleFileUpload(file, isOriginal) {
+        if (!file) return;
+        const blob = file;
+        if (isOriginal) {
+            originalImageBlob = blob;
+            const reader = new FileReader();
+            reader.onload = (e) => { originalPreview.src = e.target.result; };
+            reader.readAsDataURL(blob);
+        } else {
+            depthImageBlob = blob;
+            const reader = new FileReader();
+            reader.onload = (e) => { depthPreview.src = e.target.result; };
+            reader.readAsDataURL(blob);
+        }
+    }
+    
+    originalInput.addEventListener('change', (e) => {
+        if (e.target.files.length) handleFileUpload(e.target.files[0], true);
+    });
+    depthInput.addEventListener('change', (e) => {
+        if (e.target.files.length) handleFileUpload(e.target.files[0], false);
+    });
+    
+    depthStrengthSlider.addEventListener('input', () => {
+        strengthVal.innerText = depthStrengthSlider.value;
+    });
+    gridResSlider.addEventListener('input', () => {
+        gridVal.innerText = gridResSlider.value;
+    });
+    generateBtn.addEventListener('click', generatePreview);
+    
+    // --- EXPORT as standalone HTML (360 photo with embedded images and same logic) ---
+    async function exportAsHTML() {
+        if (!originalImageBlob || !depthImageBlob) {
+            alert("Please upload both images before export.");
+            return;
+        }
+        const strength = depthStrengthSlider.value;
+        const gridRes = gridResSlider.value;
+        
+        // convert images to base64 for embedding
+        const origBase64 = await blobToBase64(originalImageBlob);
+        const depthBase64 = await blobToBase64(depthImageBlob);
+        
+        const htmlTemplate = generateStandaloneHTML(origBase64, depthBase64, strength, gridRes);
+        const blob = new Blob([htmlTemplate], { type: 'text/html' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.href = url;
+        link.download = 'depth_360_photo.html';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }
+    
+    function blobToBase64(blob) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        });
+    }
+    
+    function generateStandaloneHTML(origBase64, depthBase64, strength, gridRes) {
+        return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>360 Depth Photo - Motion Parallax</title>
+    <style>
+        body { margin: 0; overflow: hidden; font-family: system-ui; background: black; color: white; }
+        #info { position: absolute; bottom: 15px; left: 15px; background: rgba(0,0,0,0.6); padding: 6px 14px; border-radius: 30px; font-size: 12px; pointer-events: none; z-index: 10; backdrop-filter: blur(4px); }
+        #gyro-hint { position: absolute; bottom: 20px; right: 20px; background: #000000aa; padding: 5px 12px; border-radius: 20px; font-size: 10px; pointer-events: none; }
+        @media (max-width: 600px) { #info { font-size: 9px; } }
+    </style>
+</head>
+<body>
+    <div id="info">🌀 360 Depth Photo | Tilt device / drag mouse to see 3D parallax</div>
+    <div id="gyro-hint">📱 motion enabled</div>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+            }
+        }
+    </script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        
+        const origBase64 = \`${origBase64}\`;
+        const depthBase64 = \`${depthBase64}\`;
+        const depthStrength = ${strength};
+        const meshQuality = ${gridRes};
+        
+        function loadImageFromBase64(src) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = reject;
+                img.src = src;
+            });
+        }
+        
+        async function resizeDepthMap(originalImg, depthImg) {
+            const w = originalImg.width, h = originalImg.height;
+            const canvas = document.createElement('canvas');
+            canvas.width = w; canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(depthImg, 0, 0, w, h);
+            const imgData = ctx.getImageData(0, 0, w, h);
+            return { width: w, height: h, data: imgData.data };
+        }
+        
+        function buildGeometry(originalImg, depthData, depthW, depthH, segW, segH, str) {
+            const aspect = originalImg.width / originalImg.height;
+            const planeW = 8.0, planeH = planeW / aspect;
+            const geometry = new THREE.PlaneGeometry(planeW, planeH, segW, segH);
+            const positions = geometry.attributes.position.array;
+            const uvs = geometry.attributes.uv.array;
+            for (let i = 0; i <= segH; i++) {
+                for (let j = 0; j <= segW; j++) {
+                    const idx = i * (segW+1) + j;
+                    const u = uvs[idx*2], v = uvs[idx*2+1];
+                    const px = Math.floor(u * (depthW-1));
+                    const py = Math.floor((1-v) * (depthH-1));
+                    const bright = depthData[(py*depthW+px)*4] / 255;
+                    const zOff = (bright * 2 - 1) * str;
+                    positions[idx*3+2] = zOff;
+                }
+            }
+            geometry.computeVertexNormals();
+            return geometry;
+        }
+        
+        async function init() {
+            const origImg = await loadImageFromBase64(origBase64);
+            const depthImg = await loadImageFromBase64(depthBase64);
+            const { width: dw, height: dh, data: depthPixelData } = await resizeDepthMap(origImg, depthImg);
+            const segW = meshQuality;
+            const segH = Math.floor(meshQuality * (origImg.height / origImg.width));
+            const geometry = buildGeometry(origImg, depthPixelData, dw, dh, segW, segH, depthStrength);
+            const texture = new THREE.Texture(origImg);
+            texture.needsUpdate = true;
+            const material = new THREE.MeshStandardMaterial({ map: texture, roughness: 0.4, metalness: 0.1, side: THREE.DoubleSide });
+            const mesh = new THREE.Mesh(geometry, material);
+            
+            const scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x03060c);
+            scene.fog = new THREE.FogExp2(0x03060c, 0.008);
+            const ambient = new THREE.AmbientLight(0x404060);
+            const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+            dirLight.position.set(5,8,7);
+            const fill = new THREE.PointLight(0x556688,0.5);
+            fill.position.set(-3,2,4);
+            scene.add(ambient, dirLight, fill);
+            scene.add(mesh);
+            
+            const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 1000);
+            camera.position.set(0,0,12);
+            const controls = new OrbitControls(camera, document.body);
+            controls.enableDamping = true; controls.dampingFactor = 0.05;
+            controls.rotateSpeed = 1.2; controls.enableZoom = true; controls.target.set(0,0,0);
+            
+            const renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            document.body.appendChild(renderer.domElement);
+            
+            // Device orientation integration
+            let orientationActive = false;
+            let orientListener = null;
+            const radius = 11.5;
+            const targetPos = new THREE.Vector3(0,0,0);
+            function enableMotion() {
+                if (orientListener) return;
+                orientListener = (event) => {
+                    let gamma = event.gamma || 0;
+                    let beta = event.beta || 0;
+                    const limitedGamma = Math.min(Math.max(gamma, -55), 55);
+                    const limitedBeta = Math.min(Math.max(beta, -40), 40);
+                    const theta = (limitedGamma * Math.PI)/180;
+                    const phi = (limitedBeta * Math.PI)/180;
+                    const x = radius * Math.sin(theta) * Math.cos(phi);
+                    const y = radius * Math.sin(phi);
+                    const z = radius * Math.cos(theta) * Math.cos(phi);
+                    camera.position.set(x, y, z);
+                    camera.lookAt(targetPos);
+                    controls.target.copy(targetPos);
+                };
+                window.addEventListener('deviceorientation', orientListener);
+            }
+            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                document.body.addEventListener('click', () => {
+                    DeviceOrientationEvent.requestPermission().then(grant => {
+                        if(grant === 'granted') enableMotion();
+                    }).catch(e=>console.log);
+                }, { once: true });
+                document.getElementById('gyro-hint').innerText = "🎯 Tap to enable 360 motion";
+            } else {
+                enableMotion();
+            }
+            
+            function animate() {
+                requestAnimationFrame(animate);
+                if (!orientationActive && controls) controls.update();
+                renderer.render(scene, camera);
+            }
+            animate();
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+        init();
+    </script>
+</body>
+</html>`;
+    }
+    
+    exportBtn.addEventListener('click', exportAsHTML);
+    
+    // initial slider visuals
+    strengthVal.innerText = depthStrengthSlider.value;
+    gridVal.innerText = gridResSlider.value;
+    
+    // on window resize for active preview
+    window.addEventListener('resize', () => {
+        if (currentCamera && currentRenderer) {
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            currentCamera.aspect = width / height;
+            currentCamera.updateProjectionMatrix();
+            currentRenderer.setSize(width, height);
+        }
+    });
+</script>
+</body>
+</html>
