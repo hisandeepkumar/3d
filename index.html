@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>3D IMAX Theatre — Neon Edition</title>
+    <title>3D IMAX Theatre — Premium Cinema</title>
 
     <style>
+        /* ── Global Styles ── */
         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap');
 
         *,
@@ -16,21 +17,22 @@
             padding: 0;
         }
         :root {
-            --neon-cyan: #00f0ff;
-            --neon-magenta: #ff0088;
-            --neon-purple: #6a0dad;
-            --dark-bg: #0a0515;
-            --glass-bg: rgba(10, 5, 21, 0.85);
-            --glass-border: rgba(0, 240, 255, 0.25);
-            --text: #e8e4dc;
-            --text-dim: #8a8480;
+            --gold: #d4af37;
+            --gold-light: #f0d080;
+            --gold-dim: #8a6a20;
+            --red-velvet: #6b1515;
+            --dark-bg: #0a0505;
+            --glass-bg: rgba(10, 5, 5, 0.85);
+            --glass-border: rgba(212, 175, 55, 0.25);
+            --text: #f0ece4;
+            --text-dim: #a09890;
         }
         html,
         body {
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background: #0a0515;
+            background: #0a0505;
             font-family: "Inter", sans-serif;
             color: var(--text);
             user-select: none;
@@ -65,14 +67,14 @@
             width: 50%;
             height: 100%;
             transition: transform 1.6s cubic-bezier(0.86, 0, 0.07, 1);
+            background: linear-gradient(105deg, #1a0005 0%, #2d0008 40%, #3d0010 70%, #2a0008 100%);
         }
         #curtain-left {
             left: 0;
-            background: linear-gradient(105deg, #0a0515 0%, #1a0a2e 40%, #2d0a4a 70%, #1a0a2e 100%);
         }
         #curtain-right {
             right: 0;
-            background: linear-gradient(255deg, #0a0515 0%, #1a0a2e 40%, #2d0a4a 70%, #1a0a2e 100%);
+            background: linear-gradient(255deg, #1a0005 0%, #2d0008 40%, #3d0010 70%, #2a0008 100%);
         }
         #curtain-left::before,
         #curtain-right::before {
@@ -82,30 +84,27 @@
             background: repeating-linear-gradient(90deg,
                     transparent 0px,
                     transparent 18px,
-                    rgba(0, 240, 255, 0.05) 18px,
-                    rgba(0, 240, 255, 0.05) 20px,
+                    rgba(0, 0, 0, 0.25) 18px,
+                    rgba(0, 0, 0, 0.25) 20px,
                     transparent 20px,
                     transparent 26px,
-                    rgba(255, 0, 136, 0.04) 26px,
-                    rgba(255, 0, 136, 0.04) 28px);
+                    rgba(255, 215, 0, 0.04) 26px,
+                    rgba(255, 215, 0, 0.04) 28px);
         }
-        #curtain-left::after {
-            content: "";
-            position: absolute;
-            right: 0;
-            top: 0;
-            width: 6px;
-            height: 100%;
-            background: linear-gradient(to bottom, #00f0ff, #ff0088, #00f0ff, #ff0088);
-        }
+        #curtain-left::after,
         #curtain-right::after {
             content: "";
             position: absolute;
-            left: 0;
             top: 0;
             width: 6px;
             height: 100%;
-            background: linear-gradient(to bottom, #00f0ff, #ff0088, #00f0ff, #ff0088);
+            background: linear-gradient(to bottom, #d4af37, #8a6a20, #d4af37, #8a6a20);
+        }
+        #curtain-left::after {
+            right: 0;
+        }
+        #curtain-right::after {
+            left: 0;
         }
         .curtains-open #curtain-left {
             transform: translateX(-100%);
@@ -128,47 +127,44 @@
         }
         .imax-brand {
             font-family: "Bebas Neue", sans-serif;
-            font-size: 64px;
+            font-size: 72px;
             letter-spacing: 12px;
-            background: linear-gradient(90deg, #00f0ff, #ff0088, #00f0ff);
-            background-size: 200% 100%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: neon-shift 3s ease-in-out infinite;
-            text-shadow: 0 0 60px rgba(0, 240, 255, 0.4), 0 0 120px rgba(255, 0, 136, 0.3);
+            color: var(--gold);
+            text-shadow: 0 0 40px rgba(212, 175, 55, 0.6), 0 0 80px rgba(212, 175, 55, 0.3);
+            animation: pulse-gold 2s ease-in-out infinite;
         }
-        @keyframes neon-shift {
+        @keyframes pulse-gold {
             0%,
             100% {
-                background-position: 0% 50%;
+                text-shadow: 0 0 40px rgba(212, 175, 55, 0.6), 0 0 80px rgba(212, 175, 55, 0.3);
             }
             50% {
-                background-position: 100% 50%;
+                text-shadow: 0 0 60px rgba(212, 175, 55, 0.9), 0 0 120px rgba(212, 175, 55, 0.5);
             }
         }
         .loading-subtitle {
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 300;
-            letter-spacing: 4px;
+            letter-spacing: 6px;
             text-transform: uppercase;
             color: var(--text-dim);
             margin-top: 8px;
             margin-bottom: 28px;
         }
         .loading-bar-wrap {
-            width: 280px;
-            height: 2px;
-            background: rgba(0, 240, 255, 0.15);
-            border-radius: 2px;
+            width: 300px;
+            height: 3px;
+            background: rgba(212, 175, 55, 0.15);
+            border-radius: 3px;
             overflow: hidden;
             margin: 0 auto;
         }
         .loading-bar-inner {
             height: 100%;
             width: 0%;
-            background: linear-gradient(90deg, #ff0088, #00f0ff, #ff0088);
+            background: linear-gradient(90deg, #8a6a20, #d4af37, #8a6a20);
             background-size: 200% 100%;
-            border-radius: 2px;
+            border-radius: 3px;
             transition: width 0.3s ease;
             animation: shimmer 1.5s linear infinite;
         }
@@ -189,7 +185,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(10, 5, 21, 0.7);
+            background: rgba(10, 5, 5, 0.7);
             backdrop-filter: blur(4px);
             animation: fade-in 0.5s ease;
         }
@@ -211,7 +207,7 @@
             width: 90%;
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
-            box-shadow: 0 32px 80px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(0, 240, 255, 0.08), 0 0 60px rgba(0, 240, 255, 0.05);
+            box-shadow: 0 32px 80px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(212, 175, 55, 0.08), 0 0 60px rgba(212, 175, 55, 0.05);
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
             position: relative;
             overflow: hidden;
@@ -223,20 +219,20 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle at 50% 0%, rgba(0, 240, 255, 0.06) 0%, transparent 60%);
+            background: radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.06) 0%, transparent 60%);
             pointer-events: none;
         }
         #drop-zone.drag-over {
-            border-color: var(--neon-cyan);
-            box-shadow: 0 32px 80px rgba(0, 0, 0, 0.8), 0 0 60px rgba(0, 240, 255, 0.2);
+            border-color: var(--gold);
+            box-shadow: 0 32px 80px rgba(0, 0, 0, 0.8), 0 0 60px rgba(212, 175, 55, 0.2);
         }
         .drop-icon {
             width: 72px;
             height: 72px;
             margin: 0 auto 24px;
-            color: var(--neon-cyan);
+            color: var(--gold);
             opacity: 0.85;
-            filter: drop-shadow(0 0 20px rgba(0, 240, 255, 0.3));
+            filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.3));
         }
         .drop-icon svg {
             width: 100%;
@@ -247,10 +243,9 @@
             font-family: "Bebas Neue", sans-serif;
             font-size: 38px;
             letter-spacing: 4px;
-            background: linear-gradient(90deg, #00f0ff, #ff0088);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--gold);
             margin-bottom: 10px;
+            text-shadow: 0 0 30px rgba(212, 175, 55, 0.3);
         }
         .welcome-subtitle {
             font-size: 14px;
@@ -262,11 +257,11 @@
             align-items: center;
             justify-content: center;
             padding: 12px 36px;
-            background: linear-gradient(135deg, #ff0088, #00f0ff, #ff0088);
+            background: linear-gradient(135deg, #8a6a20, #d4af37, #8a6a20);
             background-size: 200% 100%;
             border: none;
             border-radius: 40px;
-            color: #fff;
+            color: #0a0505;
             font-family: "Inter", sans-serif;
             font-size: 14px;
             font-weight: 600;
@@ -274,19 +269,19 @@
             cursor: pointer;
             margin-bottom: 24px;
             transition: background-position 0.4s ease, transform 0.2s ease, box-shadow 0.2s ease;
-            box-shadow: 0 4px 30px rgba(0, 240, 255, 0.3);
+            box-shadow: 0 4px 30px rgba(212, 175, 55, 0.3);
         }
         .browse-btn:hover {
             background-position: 100% 0;
             transform: translateY(-2px);
-            box-shadow: 0 8px 40px rgba(0, 240, 255, 0.5);
+            box-shadow: 0 8px 40px rgba(212, 175, 55, 0.5);
         }
         .browse-btn:active {
             transform: translateY(0);
         }
         .format-info {
             font-size: 11px;
-            color: rgba(138, 132, 128, 0.55);
+            color: rgba(160, 152, 144, 0.55);
             letter-spacing: 1.5px;
             text-transform: uppercase;
         }
@@ -302,22 +297,22 @@
             padding: 10px;
         }
         .movie-card {
-            background: rgba(20, 10, 30, 0.7);
-            border: 1px solid rgba(0, 240, 255, 0.15);
+            background: rgba(20, 10, 8, 0.7);
+            border: 1px solid rgba(212, 175, 55, 0.15);
             border-radius: 12px;
             padding: 0;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             text-align: left;
-            color: var(--neon-cyan);
+            color: var(--gold);
             overflow: hidden;
             display: flex;
             flex-direction: column;
         }
         .movie-card:hover {
             transform: translateY(-6px) scale(1.02);
-            border-color: rgba(0, 240, 255, 0.6);
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), 0 0 30px rgba(0, 240, 255, 0.15);
+            border-color: rgba(212, 175, 55, 0.6);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), 0 0 30px rgba(212, 175, 55, 0.15);
         }
         .movie-card-thumb-container {
             width: 100%;
@@ -356,8 +351,8 @@
             position: absolute;
             bottom: 80px;
             right: 20px;
-            background: rgba(10, 5, 21, 0.95);
-            border: 1px solid rgba(0, 240, 255, 0.3);
+            background: rgba(10, 5, 5, 0.95);
+            border: 1px solid rgba(212, 175, 55, 0.3);
             border-radius: 8px;
             backdrop-filter: blur(15px);
             padding: 15px;
@@ -366,15 +361,15 @@
             gap: 8px;
             min-width: 200px;
             z-index: 500;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 240, 255, 0.05);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8), 0 0 30px rgba(212, 175, 55, 0.05);
         }
         .track-menu-container h3 {
             margin: 0;
             font-size: 11px;
             text-transform: uppercase;
-            color: var(--neon-cyan);
+            color: var(--gold);
             letter-spacing: 2px;
-            border-bottom: 1px solid rgba(0, 240, 255, 0.15);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.15);
             padding-bottom: 8px;
             margin-bottom: 4px;
         }
@@ -390,12 +385,12 @@
             transition: all 0.2s;
         }
         .track-option:hover {
-            background: rgba(0, 240, 255, 0.08);
+            background: rgba(212, 175, 55, 0.08);
             color: #fff;
         }
         .track-option.active {
-            background: rgba(0, 240, 255, 0.12);
-            color: var(--neon-cyan);
+            background: rgba(212, 175, 55, 0.12);
+            color: var(--gold);
         }
 
         /* ── Buffering ── */
@@ -408,20 +403,20 @@
             align-items: center;
             justify-content: center;
             gap: 20px;
-            background: rgba(10, 5, 21, 0.6);
+            background: rgba(10, 5, 5, 0.6);
             pointer-events: none;
         }
         .film-reel {
             width: 80px;
             height: 80px;
             animation: spin-reel 1.5s linear infinite;
-            color: var(--neon-cyan);
+            color: var(--gold);
         }
         .film-reel svg {
             width: 100%;
             height: 100%;
-            stroke: var(--neon-cyan);
-            filter: drop-shadow(0 0 20px rgba(0, 240, 255, 0.4));
+            stroke: var(--gold);
+            filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.4));
         }
         @keyframes spin-reel {
             from {
@@ -435,7 +430,7 @@
             font-size: 13px;
             letter-spacing: 4px;
             text-transform: uppercase;
-            color: var(--neon-cyan);
+            color: var(--gold);
             font-weight: 300;
         }
 
@@ -446,9 +441,9 @@
             left: 50%;
             transform: translateX(-50%);
             z-index: 800;
-            background: rgba(255, 0, 136, 0.9);
+            background: rgba(139, 26, 26, 0.92);
             backdrop-filter: blur(12px);
-            border: 1px solid rgba(0, 240, 255, 0.3);
+            border: 1px solid rgba(212, 175, 55, 0.3);
             border-radius: 10px;
             padding: 12px 24px;
             font-size: 13px;
@@ -458,7 +453,7 @@
             text-align: center;
             animation: toast-in 0.3s ease;
             display: none;
-            box-shadow: 0 0 30px rgba(255, 0, 136, 0.2);
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.15);
         }
         @keyframes toast-in {
             from {
@@ -479,9 +474,9 @@
             right: 0;
             z-index: 400;
             padding: 0 20px 16px;
-            background: linear-gradient(to top, rgba(10, 5, 21, 0.95) 0%, rgba(10, 5, 21, 0.6) 60%, transparent 100%);
+            background: linear-gradient(to top, rgba(10, 5, 5, 0.95) 0%, rgba(10, 5, 5, 0.6) 60%, transparent 100%);
             transition: opacity 0.4s ease, transform 0.4s ease;
-            border-top: 1px solid rgba(0, 240, 255, 0.05);
+            border-top: 1px solid rgba(212, 175, 55, 0.05);
         }
         #hud.hud-hidden {
             opacity: 0;
@@ -524,13 +519,12 @@
             font-family: "Bebas Neue", sans-serif;
             font-size: 15px;
             letter-spacing: 2px;
-            background: linear-gradient(90deg, #00f0ff, #ff0088);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            border: 1px solid rgba(0, 240, 255, 0.2);
+            color: var(--gold);
+            border: 1px solid rgba(212, 175, 55, 0.2);
             padding: 2px 10px;
             border-radius: 4px;
-            background-color: rgba(0, 240, 255, 0.05);
+            background-color: rgba(212, 175, 55, 0.05);
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
         }
         .fps {
             font-size: 11px;
@@ -559,7 +553,7 @@
             left: 0;
             top: 0;
             height: 100%;
-            background: rgba(0, 240, 255, 0.15);
+            background: rgba(212, 175, 55, 0.15);
             border-radius: 4px;
             pointer-events: none;
             width: 0%;
@@ -570,11 +564,11 @@
             left: 0;
             top: 0;
             height: 100%;
-            background: linear-gradient(90deg, #ff0088, #00f0ff);
+            background: linear-gradient(90deg, #8a6a20, #d4af37);
             border-radius: 4px;
             pointer-events: none;
             width: 0%;
-            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
         }
         #seek-bar {
             position: absolute;
@@ -624,11 +618,11 @@
             transition: all 0.2s;
         }
         .ctrl-btn:hover {
-            background: rgba(0, 240, 255, 0.12);
-            border-color: rgba(0, 240, 255, 0.35);
-            color: var(--neon-cyan);
+            background: rgba(212, 175, 55, 0.12);
+            border-color: rgba(212, 175, 55, 0.35);
+            color: var(--gold);
             transform: scale(1.08);
-            box-shadow: 0 0 20px rgba(0, 240, 255, 0.1);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.1);
         }
         .ctrl-btn:active {
             transform: scale(0.95);
@@ -636,16 +630,16 @@
         .play-btn {
             width: 48px;
             height: 48px;
-            background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(255, 0, 136, 0.08));
-            border-color: rgba(0, 240, 255, 0.3);
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(139, 26, 26, 0.08));
+            border-color: rgba(212, 175, 55, 0.3);
         }
         .play-btn:hover {
-            background: linear-gradient(135deg, rgba(0, 240, 255, 0.25), rgba(255, 0, 136, 0.15));
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.25), rgba(139, 26, 26, 0.15));
         }
         .ctrl-btn.active {
-            background: rgba(0, 240, 255, 0.15);
-            border-color: rgba(0, 240, 255, 0.5);
-            color: var(--neon-cyan);
+            background: rgba(212, 175, 55, 0.15);
+            border-color: rgba(212, 175, 55, 0.5);
+            color: var(--gold);
         }
         .time-display {
             display: flex;
@@ -680,11 +674,11 @@
             transition: border-color 0.2s, background 0.2s;
         }
         .ctrl-select:hover {
-            border-color: rgba(0, 240, 255, 0.3);
-            background: rgba(0, 240, 255, 0.05);
+            border-color: rgba(212, 175, 55, 0.3);
+            background: rgba(212, 175, 55, 0.05);
         }
         .ctrl-select option {
-            background: #1a1025;
+            background: #1a1010;
             color: var(--text);
         }
         input[type="range"] {
@@ -698,15 +692,15 @@
             height: 3px;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 3px;
-            accent-color: var(--neon-cyan);
+            accent-color: var(--gold);
         }
         #volume-bar::-webkit-slider-thumb {
             -webkit-appearance: none;
             width: 14px;
             height: 14px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #00f0ff, #ff0088);
-            box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+            background: linear-gradient(135deg, #d4af37, #8a6a20);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
             cursor: pointer;
             transition: transform 0.15s;
         }
@@ -723,10 +717,10 @@
             font-size: 12px;
             font-weight: 400;
             letter-spacing: 1px;
-            color: rgba(0, 240, 255, 0.6);
-            background: rgba(10, 5, 21, 0.7);
+            color: rgba(212, 175, 55, 0.6);
+            background: rgba(10, 5, 5, 0.7);
             backdrop-filter: blur(8px);
-            border: 1px solid rgba(0, 240, 255, 0.12);
+            border: 1px solid rgba(212, 175, 55, 0.12);
             padding: 6px 18px;
             border-radius: 20px;
             pointer-events: none;
@@ -785,8 +779,8 @@
         <div id="curtain-left"></div>
         <div id="curtain-right"></div>
         <div id="loading-center">
-            <div class="imax-brand">⚡ NEON IMAX ⚡</div>
-            <div class="loading-subtitle">Preparing your experience</div>
+            <div class="imax-brand">✦ IMAX ✦</div>
+            <div class="loading-subtitle">Premium Cinema Experience</div>
             <div class="loading-bar-wrap">
                 <div class="loading-bar-inner" id="loading-bar"></div>
             </div>
@@ -804,7 +798,7 @@
                     <path d="M2 8h20" />
                 </svg>
             </div>
-            <div class="welcome-title">⚡ NEON MEDIA LIBRARY ⚡</div>
+            <div class="welcome-title">✦ Media Library ✦</div>
             <div class="welcome-subtitle">Upload a video or load from server</div>
 
             <input type="file" id="file-input" accept="video/*" style="display:none" />
@@ -851,7 +845,7 @@
                 <span style="color:var(--text-dim);font-size:11px;margin-left:4px;" id="hud-source">No file loaded</span>
             </div>
             <div class="hud-right-top">
-                <span class="quality-badge">⚡ NEON 60 fps</span>
+                <span class="quality-badge">✦ IMAX 60 fps</span>
                 <span class="fps" id="fps-counter">0 fps</span>
             </div>
         </div>
@@ -942,8 +936,6 @@
             SCR_Z = -18,
             SCR_Y = 10.8;
         const BASE_PITCH = 0.15;
-        const NEON_CYAN = '#00f0ff';
-        const NEON_MAGENTA = '#ff0088';
 
         // ── Utils ──
         function fmtTime(s) {
@@ -1214,9 +1206,9 @@
 
         function buildCurtains(scene) {
             const g = new THREE.Group();
-            const cm = new THREE.MeshStandardMaterial({ color: 0x1a0a2e, roughness: 0.98, side: THREE.DoubleSide });
-            const tm = new THREE.MeshStandardMaterial({ color: 0x00f0ff, emissive: 0x00f0ff, emissiveIntensity: 0.3,
-                roughness: 0.4, metalness: 0.5 });
+            const cm = new THREE.MeshStandardMaterial({ color: 0x1a0005, roughness: 0.98, side: THREE.DoubleSide });
+            const tm = new THREE.MeshStandardMaterial({ color: 0xd4af37, emissive: 0xd4af37, emissiveIntensity: 0.2,
+                roughness: 0.3, metalness: 0.7 });
             const mkCurt = (xPos) => {
                 const geo = new THREE.PlaneGeometry(16, ROOM_H, 48, 1);
                 const p = geo.attributes.position;
@@ -1242,7 +1234,7 @@
             scene.add(g);
         }
 
-        // ── Room (Neon Themed) ──
+        // ── Room (Premium Cinema) ──
         function buildRoom(scene) {
             const g = new THREE.Group();
 
@@ -1250,26 +1242,27 @@
                 const c = document.createElement('canvas');
                 c.width = c.height = size;
                 const ctx = c.getContext('2d');
-                ctx.fillStyle = '#0a0515';
+                ctx.fillStyle = '#1a0808';
                 ctx.fillRect(0, 0, size, size);
                 for (let i = 0; i < 12000; i++) {
                     const x = Math.random() * size,
                         y = Math.random() * size;
-                    const r = Math.floor(Math.random() * 30 + 10);
-                    const g2 = Math.floor(Math.random() * 4);
-                    const b2 = Math.floor(Math.random() * 30 + 20);
+                    const r = Math.floor(Math.random() * 30 + 20);
+                    const g2 = Math.floor(Math.random() * 6);
+                    const b2 = Math.floor(Math.random() * 6);
                     ctx.fillStyle = `rgb(${r},${g2},${b2})`;
                     ctx.fillRect(x, y, 1 + Math.random() * 1.5, 1 + Math.random() * 1.5);
                 }
-                ctx.strokeStyle = 'rgba(0,240,255,0.06)';
+                // subtle pattern
+                ctx.strokeStyle = 'rgba(212,175,55,0.04)';
                 ctx.lineWidth = 1;
-                for (let x = 0; x < size; x += 16) {
+                for (let x = 0; x < size; x += 20) {
                     ctx.beginPath();
                     ctx.moveTo(x, 0);
                     ctx.lineTo(x + size, size);
                     ctx.stroke();
                 }
-                for (let y = 0; y < size; y += 16) {
+                for (let y = 0; y < size; y += 20) {
                     ctx.beginPath();
                     ctx.moveTo(0, y);
                     ctx.lineTo(size, y + size);
@@ -1285,8 +1278,8 @@
             floor.position.set(0, 0, 0);
             g.add(floor);
 
-            // Neon walls - deep purple
-            const wallMat = new THREE.MeshStandardMaterial({ color: 0x0d0a2a, roughness: 0.9, metalness: 0.05 });
+            // Dark wood walls
+            const wallMat = new THREE.MeshStandardMaterial({ color: 0x0d0808, roughness: 0.85, metalness: 0.05 });
             const cy = ROOM_H / 2;
 
             const mkWall = (w, h, x, y, z, ry) => {
@@ -1303,19 +1296,19 @@
             // Front face above screen
             const fh = ROOM_H - SCR_H - 1.5;
             const tf = new THREE.Mesh(new THREE.PlaneGeometry(ROOM_W, fh),
-                new THREE.MeshStandardMaterial({ color: 0x0a0515, roughness: 1 }));
+                new THREE.MeshStandardMaterial({ color: 0x0a0505, roughness: 1 }));
             tf.position.set(0, SCR_Y + SCR_H / 2 + fh / 2 + 0.08, SCR_Z + 0.01);
             g.add(tf);
 
-            // Neon wall panels
-            const panelMat = new THREE.MeshStandardMaterial({ color: 0x1a0a3a, roughness: 0.85, emissive: 0x1a0a3a,
-                emissiveIntensity: 0.1 });
+            // Decorative wall panels with gold trim
+            const panelMat = new THREE.MeshStandardMaterial({ color: 0x1a0a0a, roughness: 0.85, emissive: 0x1a0a0a,
+                emissiveIntensity: 0.05 });
             const panelFrameMat = new THREE.MeshStandardMaterial({
-                color: 0x00f0ff,
-                emissive: 0x00f0ff,
-                emissiveIntensity: 0.2,
+                color: 0xd4af37,
+                emissive: 0xd4af37,
+                emissiveIntensity: 0.15,
                 roughness: 0.3,
-                metalness: 0.6
+                metalness: 0.7
             });
             const panelGeo = new THREE.PlaneGeometry(2.4, ROOM_H * 0.55);
             const panelFrameGeo = new THREE.BoxGeometry(2.5, ROOM_H * 0.55 + 0.15, 0.05);
@@ -1336,9 +1329,8 @@
                 }
             }
 
-            // Acoustic ceiling panels with neon tint
-            const acMat = new THREE.MeshStandardMaterial({ color: 0x0a0515, roughness: 1.0, emissive: 0x0a0515,
-                emissiveIntensity: 0.05 });
+            // Acoustic ceiling
+            const acMat = new THREE.MeshStandardMaterial({ color: 0x0a0505, roughness: 1.0 });
             const acGeo = new THREE.BoxGeometry(2.0, 0.12, 2.0);
             const acIM = new THREE.InstancedMesh(acGeo, acMat, 500);
             let ai = 0;
@@ -1354,13 +1346,13 @@
             acIM.instanceMatrix.needsUpdate = true;
             g.add(acIM);
 
-            // Neon crown moulding
+            // Crown moulding gold
             const crownMat = new THREE.MeshStandardMaterial({
-                color: 0xff0088,
-                emissive: 0xff0088,
-                emissiveIntensity: 0.15,
+                color: 0xd4af37,
+                emissive: 0xd4af37,
+                emissiveIntensity: 0.1,
                 roughness: 0.3,
-                metalness: 0.5
+                metalness: 0.7
             });
             const cr = (w, d, x, y, z, ry) => {
                 const m = new THREE.Mesh(new THREE.BoxGeometry(w, 0.12, d), crownMat);
@@ -1373,13 +1365,13 @@
             cr(ROOM_D, 0.3, -ROOM_W / 2 + 0.15, ROOM_H - 0.06, 0, Math.PI / 2);
             cr(ROOM_D, 0.3, ROOM_W / 2 - 0.15, ROOM_H - 0.06, 0, Math.PI / 2);
 
-            // Baseboard with neon glow
+            // Baseboard gold
             const baseMat = new THREE.MeshStandardMaterial({
-                color: 0x00f0ff,
-                emissive: 0x00f0ff,
-                emissiveIntensity: 0.08,
-                roughness: 0.5,
-                metalness: 0.3
+                color: 0xd4af37,
+                emissive: 0xd4af37,
+                emissiveIntensity: 0.05,
+                roughness: 0.4,
+                metalness: 0.5
             });
             const bsGeo = new THREE.BoxGeometry(ROOM_D, 0.25, 0.08);
             const bL = new THREE.Mesh(bsGeo, baseMat);
@@ -1393,7 +1385,7 @@
             scene.add(g);
         }
 
-        // ── Seats (Neon Themed) ──
+        // ── Seats (Premium) ──
         function buildSeats(scene) {
             const g = new THREE.Group();
 
@@ -1402,16 +1394,15 @@
                 c.width = c.height = size;
                 const ctx = c.getContext('2d');
                 const grad = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-                grad.addColorStop(0, '#2a0a4a');
-                grad.addColorStop(1, '#0a0515');
+                grad.addColorStop(0, '#5a1a1a');
+                grad.addColorStop(1, '#2a0808');
                 ctx.fillStyle = grad;
                 ctx.fillRect(0, 0, size, size);
                 for (let i = 0; i < 5000; i++) {
                     const x = Math.random() * size,
                         y = Math.random() * size;
-                    const v = Math.floor(Math.random() * 30 + 20);
-                    const b2 = Math.floor(Math.random() * 30 + 40);
-                    ctx.fillStyle = `rgba(${v},${Math.floor(v*0.3)},${b2},0.4)`;
+                    const v = Math.floor(Math.random() * 30 + 30);
+                    ctx.fillStyle = `rgba(${v},${Math.floor(v*0.2)},${Math.floor(v*0.2)},0.4)`;
                     ctx.fillRect(x, y, 1, 2);
                 }
                 return new THREE.CanvasTexture(c);
@@ -1442,24 +1433,24 @@
                 map: seatTex,
                 bumpMap: bumpTex,
                 bumpScale: 0.008,
-                color: 0x3a1a5a,
+                color: 0x4a1010,
                 roughness: 0.85,
                 metalness: 0.05,
                 clearcoat: 0.2,
                 clearcoatRoughness: 0.35,
-                emissive: 0x1a0a3a,
-                emissiveIntensity: 0.05
+                emissive: 0x2a0808,
+                emissiveIntensity: 0.03
             });
             const am = new THREE.MeshPhysicalMaterial({
-                color: 0x0d0a2a,
+                color: 0x0d0808,
                 roughness: 0.7,
                 metalness: 0.1,
                 clearcoat: 0.3,
                 clearcoatRoughness: 0.5,
-                emissive: 0x00f0ff,
+                emissive: 0xd4af37,
                 emissiveIntensity: 0.02
             });
-            const legMat = new THREE.MeshStandardMaterial({ color: 0x1a1025, roughness: 0.6, metalness: 0.3 });
+            const legMat = new THREE.MeshStandardMaterial({ color: 0x1a1010, roughness: 0.6, metalness: 0.3 });
             const cupMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
 
             const ROWS = 16,
@@ -1551,17 +1542,16 @@
             scene.add(g);
         }
 
-        // ── Stage (Neon) ──
+        // ── Stage ──
         function buildStage(scene) {
             const g = new THREE.Group();
-            const stageMat = new THREE.MeshStandardMaterial({ color: 0x0a0515, roughness: 0.95, emissive: 0x0a0515,
-                emissiveIntensity: 0.05 });
+            const stageMat = new THREE.MeshStandardMaterial({ color: 0x0a0505, roughness: 0.95 });
             const stage = new THREE.Mesh(new THREE.BoxGeometry(ROOM_W + 2, 0.35, 8), stageMat);
             stage.position.set(0, -0.2, SCR_Z + 3);
             g.add(stage);
 
-            const subMat = new THREE.MeshStandardMaterial({ color: 0x0d0a2a, roughness: 0.75, metalness: 0.1,
-                emissive: 0x0d0a2a, emissiveIntensity: 0.05 });
+            const subMat = new THREE.MeshStandardMaterial({ color: 0x0d0808, roughness: 0.75, metalness: 0.1,
+                emissive: 0x0d0808, emissiveIntensity: 0.03 });
             const subGeo = new THREE.BoxGeometry(1.8, 2.6, 1.4);
             const subL = new THREE.Mesh(subGeo, subMat);
             subL.position.set(-SCR_W / 2 - 1.2, 0.9, SCR_Z + 1.2);
@@ -1570,8 +1560,8 @@
             subR.position.x = SCR_W / 2 + 1.2;
             g.add(subR);
 
-            const grilleMat = new THREE.MeshStandardMaterial({ color: 0x1a0a2e, roughness: 0.8, emissive: 0x00f0ff,
-                emissiveIntensity: 0.05 });
+            const grilleMat = new THREE.MeshStandardMaterial({ color: 0x1a0808, roughness: 0.8, emissive: 0xd4af37,
+                emissiveIntensity: 0.04 });
             for (let i = 0; i < 8; i++) {
                 const stripe = new THREE.Mesh(new THREE.BoxGeometry(1.75, 0.04, 0.05), grilleMat);
                 stripe.position.set(-SCR_W / 2 - 1.2, 0.2 + i * 0.27, SCR_Z + 0.57);
@@ -1582,15 +1572,15 @@
             }
 
             const aisleLength = (-3.0) - (SCR_Z + 7);
-            const aisleMat = new THREE.MeshStandardMaterial({ color: 0x0a0515, roughness: 0.98 });
+            const aisleMat = new THREE.MeshStandardMaterial({ color: 0x0a0505, roughness: 0.98 });
             const aisle = new THREE.Mesh(new THREE.PlaneGeometry(ROOM_W + 2, aisleLength), aisleMat);
             aisle.rotation.x = -Math.PI / 2;
             aisle.position.set(0, 0.0, SCR_Z + 7 + aisleLength / 2);
             g.add(aisle);
 
-            // Neon LED strips - pulsing
-            const ledMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff });
-            const ledMat2 = new THREE.MeshBasicMaterial({ color: 0xff0088 });
+            // Warm LED strips
+            const ledMat = new THREE.MeshBasicMaterial({ color: 0xffaa44 });
+            const ledMat2 = new THREE.MeshBasicMaterial({ color: 0xff8844 });
             const ledGeo = new THREE.BoxGeometry(0.06, 0.02, aisleLength);
             const ledL = new THREE.Mesh(ledGeo, ledMat);
             ledL.position.set(-ROOM_W / 2 + 1.2, 0.03, SCR_Z + 7 + aisleLength / 2);
@@ -1599,19 +1589,18 @@
             ledR.position.set(ROOM_W / 2 - 1.2, 0.03, SCR_Z + 7 + aisleLength / 2);
             g.add(ledR);
 
-            // Neon glow lights
-            const ledGlowL = new THREE.PointLight(0x00f0ff, 0.5, 6);
+            const ledGlowL = new THREE.PointLight(0xffaa44, 0.4, 6);
             ledGlowL.position.set(-ROOM_W / 2 + 1.5, 0.3, SCR_Z + 7 + aisleLength / 2);
             g.add(ledGlowL);
-            const ledGlowR = new THREE.PointLight(0xff0088, 0.5, 6);
+            const ledGlowR = new THREE.PointLight(0xff8844, 0.4, 6);
             ledGlowR.position.set(ROOM_W / 2 - 1.5, 0.3, SCR_Z + 7 + aisleLength / 2);
             g.add(ledGlowR);
 
             const STANCHION_Z = SCR_Z + 7.2;
-            const postMat = new THREE.MeshStandardMaterial({ color: 0x222244, metalness: 0.9, roughness: 0.1,
-                emissive: 0x00f0ff, emissiveIntensity: 0.05 });
-            const ropeMat = new THREE.MeshStandardMaterial({ color: 0xff0088, roughness: 0.7, emissive: 0xff0088,
-                emissiveIntensity: 0.08 });
+            const postMat = new THREE.MeshStandardMaterial({ color: 0x222211, metalness: 0.9, roughness: 0.1,
+                emissive: 0xd4af37, emissiveIntensity: 0.03 });
+            const ropeMat = new THREE.MeshStandardMaterial({ color: 0x8a1a1a, roughness: 0.7, emissive: 0x8a1a1a,
+                emissiveIntensity: 0.05 });
             const postGeo = new THREE.CylinderGeometry(0.04, 0.06, 0.95, 16);
             const topGeo = new THREE.SphereGeometry(0.06, 12, 8);
             const ST_CNT = 14;
@@ -1657,137 +1646,230 @@
             scene.add(g);
         }
 
-        // ── Neon Text on Walls ──
-        function createNeonText(scene) {
-            const text = '💕 Made with 💕 by Sandeep 💕';
+        // ── Wall Decor: "Made with 💕 by Sandeep" (Big Gold Text) ──
+        function createWallText(scene) {
+            const text = 'Made with 💕 by Sandeep';
+            const canvas = document.createElement('canvas');
+            canvas.width = 2048;
+            canvas.height = 384;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            function makeTextTexture(color, glowColor) {
-                const canvas = document.createElement('canvas');
-                canvas.width = 2048;
-                canvas.height = 384;
-                const ctx = canvas.getContext('2d');
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // Gold metallic text with glow
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.font = 'bold 100px "Bebas Neue", "Inter", sans-serif';
 
-                // Glow layers
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.font = 'bold 96px "Bebas Neue", "Inter", sans-serif';
+            // Outer glow
+            ctx.shadowColor = '#d4af37';
+            ctx.shadowBlur = 80;
+            ctx.fillStyle = '#d4af37';
+            ctx.fillText(text, canvas.width / 2, canvas.height / 2);
 
-                // Outer glow
-                ctx.shadowColor = glowColor;
-                ctx.shadowBlur = 120;
-                ctx.fillStyle = color;
-                ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+            // Mid glow
+            ctx.shadowBlur = 40;
+            ctx.fillStyle = '#f0d080';
+            ctx.fillText(text, canvas.width / 2, canvas.height / 2);
 
-                // Mid glow
-                ctx.shadowBlur = 60;
-                ctx.fillStyle = color;
-                ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+            // Inner highlight
+            ctx.shadowBlur = 10;
+            ctx.fillStyle = '#fff8e0';
+            ctx.fillText(text, canvas.width / 2, canvas.height / 2);
 
-                // Inner glow
-                ctx.shadowBlur = 20;
-                ctx.fillStyle = '#ffffff';
-                ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+            // Sharp text
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#d4af37';
+            ctx.fillText(text, canvas.width / 2, canvas.height / 2);
 
-                // Sharp text on top
-                ctx.shadowBlur = 0;
-                ctx.fillStyle = color;
-                ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+            // Small decorative stars
+            ctx.font = '60px "Inter", sans-serif';
+            ctx.shadowBlur = 30;
+            ctx.shadowColor = '#d4af37';
+            ctx.fillStyle = '#d4af37';
+            ctx.fillText('✦', canvas.width * 0.06, canvas.height / 2);
+            ctx.fillText('✦', canvas.width * 0.94, canvas.height / 2);
 
-                // Small heart sparkles
-                ctx.font = '60px "Inter", sans-serif';
-                ctx.shadowBlur = 30;
-                ctx.shadowColor = '#ff0088';
-                ctx.fillStyle = '#ff0088';
-                ctx.fillText('✨', canvas.width * 0.08, canvas.height / 2);
-                ctx.fillText('✨', canvas.width * 0.92, canvas.height / 2);
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.minFilter = THREE.LinearFilter;
+            texture.magFilter = THREE.LinearFilter;
 
-                const texture = new THREE.CanvasTexture(canvas);
-                texture.minFilter = THREE.LinearFilter;
-                texture.magFilter = THREE.LinearFilter;
-                return texture;
-            }
-
-            // Left wall text - Cyan
-            const texL = makeTextTexture('#00f0ff', '#00f0ff');
-            const matL = new THREE.MeshBasicMaterial({
-                map: texL,
+            const mat = new THREE.MeshBasicMaterial({
+                map: texture,
                 transparent: true,
                 side: THREE.DoubleSide,
                 depthWrite: false,
                 blending: THREE.AdditiveBlending
             });
-            const geo = new THREE.PlaneGeometry(10, 1.8);
-            const meshL = new THREE.Mesh(geo, matL);
+            const geo = new THREE.PlaneGeometry(12, 2.2);
+            const meshL = new THREE.Mesh(geo, mat);
             meshL.position.set(-ROOM_W / 2 + 0.15, ROOM_H / 2 + 0.5, 0);
             meshL.rotation.y = Math.PI / 2;
             scene.add(meshL);
 
-            // Right wall text - Magenta
-            const texR = makeTextTexture('#ff0088', '#ff0088');
-            const matR = new THREE.MeshBasicMaterial({
-                map: texR,
-                transparent: true,
-                side: THREE.DoubleSide,
-                depthWrite: false,
-                blending: THREE.AdditiveBlending
-            });
-            const meshR = new THREE.Mesh(geo.clone(), matR);
+            const meshR = new THREE.Mesh(geo.clone(), mat);
             meshR.position.set(ROOM_W / 2 - 0.15, ROOM_H / 2 + 0.5, 0);
             meshR.rotation.y = -Math.PI / 2;
             scene.add(meshR);
 
-            // Add neon glow lights near the text
-            const glowL = new THREE.PointLight(0x00f0ff, 1.2, 12);
+            // Soft glow lights
+            const glowL = new THREE.PointLight(0xd4af37, 0.8, 12);
             glowL.position.set(-ROOM_W / 2 + 1, ROOM_H / 2 + 0.5, 0);
             scene.add(glowL);
-            const glowR = new THREE.PointLight(0xff0088, 1.2, 12);
+            const glowR = new THREE.PointLight(0xd4af37, 0.8, 12);
             glowR.position.set(ROOM_W / 2 - 1, ROOM_H / 2 + 0.5, 0);
             scene.add(glowR);
 
-            // Small floating neon particles around text
-            const particleCount = 60;
-            const particleGeo = new THREE.BufferGeometry();
-            const positions = new Float32Array(particleCount * 3);
-            const colors = new Float32Array(particleCount * 3);
-            for (let i = 0; i < particleCount; i++) {
-                const side = i < particleCount / 2 ? -1 : 1;
-                const x = side * (ROOM_W / 2 - 0.5) + (Math.random() - 0.5) * 2;
-                const y = ROOM_H / 2 + 0.5 + (Math.random() - 0.5) * 3;
-                const z = (Math.random() - 0.5) * 6;
-                positions[i * 3] = x;
-                positions[i * 3 + 1] = y;
-                positions[i * 3 + 2] = z;
-                const c = side === -1 ? [0, 0.94, 1] : [1, 0, 0.53];
-                colors[i * 3] = c[0];
-                colors[i * 3 + 1] = c[1];
-                colors[i * 3 + 2] = c[2];
-            }
-            particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            particleGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-            const particleMat = new THREE.PointsMaterial({
-                size: 0.08,
-                vertexColors: true,
-                transparent: true,
-                blending: THREE.AdditiveBlending,
-                depthWrite: false
-            });
-            const particles = new THREE.Points(particleGeo, particleMat);
-            scene.add(particles);
+            return { meshL, meshR, glowL, glowR };
+        }
 
-            return { meshL, meshR, particles, glowL, glowR };
+        // ── Picture Frames on Walls ──
+        function createPictureFrames(scene) {
+            const group = new THREE.Group();
+
+            // Frame dimensions
+            const frameW = 2.4,
+                frameH = 1.8;
+            const frameDepth = 0.06;
+            const border = 0.12;
+
+            // Gold frame material
+            const frameMat = new THREE.MeshStandardMaterial({
+                color: 0xd4af37,
+                emissive: 0xd4af37,
+                emissiveIntensity: 0.08,
+                roughness: 0.3,
+                metalness: 0.8
+            });
+
+            // Inner black mat
+            const matMat = new THREE.MeshStandardMaterial({
+                color: 0x1a1010,
+                roughness: 0.9
+            });
+
+            // Placeholder image (filmstrip pattern)
+            function createPlaceholderTexture() {
+                const c = document.createElement('canvas');
+                c.width = 512;
+                c.height = 384;
+                const ctx = c.getContext('2d');
+                ctx.fillStyle = '#0a0505';
+                ctx.fillRect(0, 0, c.width, c.height);
+                // Filmstrip perforations
+                ctx.fillStyle = '#1a0a0a';
+                for (let y = 0; y < c.height; y += 24) {
+                    ctx.fillRect(0, y, 20, 10);
+                    ctx.fillRect(c.width - 20, y, 20, 10);
+                }
+                // Center text
+                ctx.fillStyle = '#d4af37';
+                ctx.font = 'bold 36px "Inter", sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('📷', c.width / 2, c.height / 2 - 20);
+                ctx.font = '22px "Inter", sans-serif';
+                ctx.fillStyle = '#8a7a60';
+                ctx.fillText('Photo Frame', c.width / 2, c.height / 2 + 40);
+                return new THREE.CanvasTexture(c);
+            }
+
+            const placeholderTex = createPlaceholderTexture();
+
+            // Function to create a frame with an image texture
+            function createFrame(posX, posY, posZ, rotY, imageUrl = null) {
+                const frameGroup = new THREE.Group();
+
+                // Back panel (image area)
+                const backMat = new THREE.MeshStandardMaterial({
+                    map: placeholderTex,
+                    roughness: 0.7,
+                    metalness: 0.1
+                });
+                const backGeo = new THREE.PlaneGeometry(frameW - border * 2, frameH - border * 2);
+                const backMesh = new THREE.Mesh(backGeo, backMat);
+                backMesh.position.z = -frameDepth / 2;
+                frameGroup.add(backMesh);
+
+                // If image URL provided, try to load it
+                if (imageUrl) {
+                    const loader = new THREE.TextureLoader();
+                    loader.load(imageUrl,
+                        (tex) => {
+                            backMesh.material.map = tex;
+                            backMesh.material.needsUpdate = true;
+                        },
+                        undefined,
+                        () => { /* keep placeholder */ }
+                    );
+                }
+
+                // Frame border (4 bars)
+                const barGeo = (w, h) => new THREE.BoxGeometry(w, h, frameDepth);
+                const top = new THREE.Mesh(barGeo(frameW, border), frameMat);
+                top.position.set(0, frameH / 2 - border / 2, 0);
+                frameGroup.add(top);
+                const bottom = new THREE.Mesh(barGeo(frameW, border), frameMat);
+                bottom.position.set(0, -frameH / 2 + border / 2, 0);
+                frameGroup.add(bottom);
+                const left = new THREE.Mesh(barGeo(border, frameH - border * 2), frameMat);
+                left.position.set(-frameW / 2 + border / 2, 0, 0);
+                frameGroup.add(left);
+                const right = new THREE.Mesh(barGeo(border, frameH - border * 2), frameMat);
+                right.position.set(frameW / 2 - border / 2, 0, 0);
+                frameGroup.add(right);
+
+                // Corner ornaments (small spheres)
+                const cornerMat = new THREE.MeshStandardMaterial({
+                    color: 0xd4af37,
+                    emissive: 0xd4af37,
+                    emissiveIntensity: 0.1,
+                    roughness: 0.2,
+                    metalness: 0.9
+                });
+                const cornerGeo = new THREE.SphereGeometry(0.08, 8, 8);
+                const positions = [
+                    [-frameW / 2 + border / 2, frameH / 2 - border / 2],
+                    [frameW / 2 - border / 2, frameH / 2 - border / 2],
+                    [-frameW / 2 + border / 2, -frameH / 2 + border / 2],
+                    [frameW / 2 - border / 2, -frameH / 2 + border / 2]
+                ];
+                positions.forEach(([x, y]) => {
+                    const corner = new THREE.Mesh(cornerGeo, cornerMat);
+                    corner.position.set(x, y, frameDepth / 2);
+                    frameGroup.add(corner);
+                });
+
+                frameGroup.position.set(posX, posY, posZ);
+                frameGroup.rotation.y = rotY;
+                return frameGroup;
+            }
+
+            // Place frames on side walls
+            // Left wall: two frames at different heights
+            const frameL1 = createFrame(-ROOM_W / 2 + 0.2, ROOM_H * 0.7, -3, Math.PI / 2, 'wallpapers/photo1.jpg');
+            group.add(frameL1);
+            const frameL2 = createFrame(-ROOM_W / 2 + 0.2, ROOM_H * 0.3, -8, Math.PI / 2, 'wallpapers/photo2.jpg');
+            group.add(frameL2);
+
+            // Right wall
+            const frameR1 = createFrame(ROOM_W / 2 - 0.2, ROOM_H * 0.7, 3, -Math.PI / 2, 'wallpapers/photo3.jpg');
+            group.add(frameR1);
+            const frameR2 = createFrame(ROOM_W / 2 - 0.2, ROOM_H * 0.3, 8, -Math.PI / 2, 'wallpapers/photo4.jpg');
+            group.add(frameR2);
+
+            scene.add(group);
+            return group;
         }
 
         // ── Lighting ──
         let beam;
-        let neonTextMeshes = null;
 
         function buildBeam(scene) {
             const geo = new THREE.ConeGeometry(1.1, 28, 24, 1, true);
             const mat = new THREE.MeshBasicMaterial({
-                color: 0x00f0ff,
+                color: 0xffeedd,
                 transparent: true,
-                opacity: 0.025,
+                opacity: 0.02,
                 side: THREE.BackSide,
                 depthWrite: false,
                 blending: THREE.AdditiveBlending
@@ -1798,10 +1880,10 @@
             scene.add(beam);
 
             const projMat = new THREE.MeshStandardMaterial({
-                color: 0x0a0515,
+                color: 0x0a0505,
                 metalness: 0.85,
                 roughness: 0.2,
-                emissive: 0x00f0ff,
+                emissive: 0xd4af37,
                 emissiveIntensity: 0.05
             });
             const proj = new THREE.Mesh(new THREE.BoxGeometry(1.8, 1.0, 2.6), projMat);
@@ -1812,7 +1894,7 @@
                 color: 0x000000,
                 metalness: 1,
                 roughness: 0.0,
-                emissive: 0xff0088,
+                emissive: 0xff8844,
                 emissiveIntensity: 0.1
             });
             const lensGeo = new THREE.CylinderGeometry(0.18, 0.22, 0.25, 20);
@@ -1821,20 +1903,19 @@
             lens.position.set(0, 10.8, SCR_Z + 16.3);
             scene.add(lens);
 
-            const lensGlow = new THREE.PointLight(0x00f0ff, 0.6, 4);
+            const lensGlow = new THREE.PointLight(0xffeedd, 0.5, 4);
             lensGlow.position.set(0, 10.8, SCR_Z + 16.1);
             scene.add(lensGlow);
         }
 
         function updateBeam(t) {
             if (beam) {
-                beam.material.opacity = 0.02 + Math.sin(t * 0.0007) * 0.008;
-                beam.material.color.setHSL(0.52 + Math.sin(t * 0.0005) * 0.04, 1, 0.5);
+                beam.material.opacity = 0.018 + Math.sin(t * 0.0006) * 0.006;
             }
         }
 
         function buildLighting(scene) {
-            const ambientLight = new THREE.AmbientLight(0x0a0a2a, 0.8);
+            const ambientLight = new THREE.AmbientLight(0x1a0a0a, 0.6);
             scene.add(ambientLight);
 
             const screenGlow = new THREE.RectAreaLight(0xffffff, 0, SCR_W, SCR_H);
@@ -1843,8 +1924,7 @@
             scene.add(screenGlow);
 
             const ceilSpots = [];
-            // Neon ceiling spots - alternating cyan and magenta
-            const spotColors = [0x00f0ff, 0xff0088, 0x00f0ff, 0xff0088, 0x00f0ff, 0xff0088, 0x00f0ff, 0xff0088];
+            // Warm spots
             const positions = [
                 [-12, ROOM_H - 0.3, -2],
                 [12, ROOM_H - 0.3, -2],
@@ -1855,44 +1935,43 @@
                 [0, ROOM_H - 0.3, 4],
                 [0, ROOM_H - 0.3, 14]
             ];
-            positions.forEach(([x, y, z], i) => {
-                const s = new THREE.SpotLight(spotColors[i % spotColors.length], 0.3, 0, Math.PI / 7, 0.4);
+            positions.forEach(([x, y, z]) => {
+                const s = new THREE.SpotLight(0xffddbb, 0.2, 0, Math.PI / 7, 0.5);
                 s.position.set(x, y, z);
                 s.target.position.set(x, -0.5, z);
                 scene.add(s);
                 scene.add(s.target);
                 ceilSpots.push(s);
-                // Add small glow mesh
+                // Small glow mesh
                 const glowMat = new THREE.MeshBasicMaterial({
-                    color: spotColors[i % spotColors.length],
+                    color: 0xffddbb,
                     transparent: true,
-                    opacity: 0.08
+                    opacity: 0.06
                 });
                 const glowMesh = new THREE.Mesh(new THREE.SphereGeometry(0.2, 8, 8), glowMat);
                 glowMesh.position.set(x, y - 0.1, z);
                 scene.add(glowMesh);
             });
 
-            // Neon exit signs
+            // Warm exit signs
             const ex = (x, z, color) => {
-                const l = new THREE.PointLight(color, 0.6, 5);
+                const l = new THREE.PointLight(color, 0.4, 5);
                 l.position.set(x, 1.8, z);
                 scene.add(l);
-                // Glow sphere
                 const g = new THREE.Mesh(
                     new THREE.SphereGeometry(0.15, 8, 8),
-                    new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.3 })
+                    new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.2 })
                 );
                 g.position.set(x, 1.8, z);
                 scene.add(g);
             };
-            ex(-ROOM_W / 2 + 1, ROOM_D / 2 - 2, 0x00f0ff);
-            ex(ROOM_W / 2 - 1, ROOM_D / 2 - 2, 0xff0088);
+            ex(-ROOM_W / 2 + 1, ROOM_D / 2 - 2, 0xff8844);
+            ex(ROOM_W / 2 - 1, ROOM_D / 2 - 2, 0xff8844);
 
             return { ambientLight, screenGlow, ceilSpots };
         }
 
-        // ── Audio Manager ── (same as before, omitted for brevity but included in full code)
+        // ── Audio Manager (unchanged) ──
         let audioInitialized = false;
         let audioListener = null;
         let currentExternalAudio = null;
@@ -2090,7 +2169,7 @@
             });
             composer = new EffectComposer(renderer, rt);
             composer.addPass(new RenderPass(scene, camera));
-            bloomPass = new UnrealBloomPass(sz, 0.35, 0.6, 0.92);
+            bloomPass = new UnrealBloomPass(sz, 0.25, 0.5, 0.85);
             composer.addPass(bloomPass);
             const outputPass = new OutputPass();
             composer.addPass(outputPass);
@@ -2278,8 +2357,8 @@
 
             function toggleLights() {
                 lightsOn = !lightsOn;
-                const targetSpot = lightsOn ? 4000.0 : 0;
-                const targetAmb = lightsOn ? 8.0 : 0.8;
+                const targetSpot = lightsOn ? 3000.0 : 0;
+                const targetAmb = lightsOn ? 4.0 : 0.6;
                 lights.ceilSpots.forEach(s => { s.intensity = targetSpot; });
                 lights.ambientLight.intensity = targetAmb;
                 document.getElementById('lights-btn').classList.toggle('active', lightsOn);
@@ -2339,7 +2418,7 @@
                             div.className = 'movie-card';
                             div.innerHTML = `
                                 <div class="movie-card-thumb-container">
-                                    <div class="movie-card-thumb" style="display:flex;align-items:center;justify-content:center;color:var(--neon-cyan);font-size:42px;">🎬</div>
+                                    <div class="movie-card-thumb" style="display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:42px;">🎬</div>
                                 </div>
                                 <div class="movie-card-title">${m.replace(/\.(mkv|mp4|webm|mov|m4v|ogv)$/i, '')}</div>
                             `;
@@ -2352,8 +2431,8 @@
                     })
                     .catch(e => {
                         movieGrid.innerHTML = `
-                            <div style="padding:20px;color:#ff0088;font-size:14px;">
-                                ⚡ Local server not running.<br/>
+                            <div style="padding:20px;color:#8a1a1a;font-size:14px;">
+                                ⚠️ Local server not running.<br/>
                                 <span style="color:var(--text-dim);font-size:12px;">Upload a video instead, or run 'node server.js'</span>
                             </div>
                         `;
@@ -2461,8 +2540,8 @@
         renderer.shadowMap.enabled = false;
 
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x0a0515);
-        scene.fog = new THREE.FogExp2(0x0a0515, 0.016);
+        scene.background = new THREE.Color(0x0a0505);
+        scene.fog = new THREE.FogExp2(0x0a0505, 0.016);
 
         const camera = new THREE.PerspectiveCamera(58, window.innerWidth / window.innerHeight, 0.1, 120);
         camera.position.set(0, 2.43, 4.66);
@@ -2477,8 +2556,11 @@
         const lights = buildLighting(scene);
         buildBeam(scene);
 
-        // ── ADD NEON TEXT ON WALLS ──
-        neonTextMeshes = createNeonText(scene);
+        // ── Add Wall Text ──
+        createWallText(scene);
+
+        // ── Add Picture Frames ──
+        createPictureFrames(scene);
 
         const post = initPost(renderer, scene, camera);
         const uiDeps = { camera, renderer, lights, scene };
@@ -2518,26 +2600,6 @@
             updateScreenGlow(lights.screenGlow);
             updateBeam(t);
             if (uiDeps.updateCamera) uiDeps.updateCamera();
-
-            // Animate neon particles
-            if (neonTextMeshes && neonTextMeshes.particles) {
-                const pos = neonTextMeshes.particles.geometry.attributes.position;
-                const array = pos.array;
-                for (let i = 0; i < array.length; i += 3) {
-                    array[i + 1] += Math.sin(t * 0.001 + i) * 0.001;
-                    array[i + 2] += Math.cos(t * 0.0012 + i * 0.5) * 0.001;
-                }
-                pos.needsUpdate = true;
-                neonTextMeshes.particles.rotation.y = Math.sin(t * 0.0003) * 0.02;
-            }
-
-            // Pulse neon glow lights
-            if (neonTextMeshes) {
-                const pulse = 0.8 + Math.sin(t * 0.002) * 0.4;
-                neonTextMeshes.glowL.intensity = pulse;
-                neonTextMeshes.glowR.intensity = pulse;
-            }
-
             post.composer.render();
         }
 
@@ -2548,8 +2610,8 @@
             else renderer.setAnimationLoop(animate);
         });
 
-        console.log('⚡ NEON IMAX Theatre loaded successfully!');
-        console.log('💕 Made with 💕 by Sandeep');
+        console.log('✦ Premium IMAX Cinema loaded successfully!');
+        console.log('Made with 💕 by Sandeep');
     </script>
 </body>
 </html>
