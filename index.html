@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>3D IMAX Theatre — Premium Cinema</title>
+    <title>3D IMAX Theatre</title>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap');
@@ -17,8 +17,6 @@
         }
         :root {
             --gold: #d4af37;
-            --gold-light: #f0d080;
-            --gold-dim: #8a6a20;
             --dark-bg: #0a0505;
             --glass-bg: rgba(10, 5, 5, 0.85);
             --glass-border: rgba(212, 175, 55, 0.25);
@@ -819,7 +817,7 @@
     </div>
 
     <canvas id="theatre-canvas"></canvas>
-    <video id="cinema-video" crossorigin="anonymous"></video>
+    <video id="cinema-video" crossorigin="anonymous" muted></video>
 
     <div id="drag-hint">🖱 Drag to look around the cinema</div>
 
@@ -901,10 +899,8 @@
 
     <script type="module">
         // ── CONFIG ────────────────────────────────────────────────────────────
-        // Set a default video URL (direct MP4 link) – change this to your own link
+        // Default video URL (direct MP4 link) – change this to your own
         const DEFAULT_VIDEO_URL = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
-        // If you want to use a YouTube video, you need to extract a direct MP4 link or use a proxy.
-        // For Google Drive, use a direct download link: https://drive.google.com/uc?export=download&id=FILE_ID
 
         // ── Imports ──
         import * as THREE from 'three';
@@ -943,6 +939,9 @@
         // ── Video Manager ──
         const video = document.getElementById('cinema-video');
         video.volume = 1.0;
+        // Remove muted so audio works
+        video.muted = false;
+
         const videoTexture = new THREE.VideoTexture(video);
         videoTexture.minFilter = THREE.LinearFilter;
         videoTexture.magFilter = THREE.LinearFilter;
@@ -1014,7 +1013,8 @@
                 document.getElementById('total-time').textContent = fmtTime(video.duration || 0);
                 state.hasVideo = true;
                 updateScreenMasking(video.videoWidth / video.videoHeight, videoTexture);
-                video.play().catch(() => {});
+                // Auto-play
+                video.play().catch(e => console.warn('Auto-play blocked:', e));
                 document.getElementById('welcome-screen').style.display = 'none';
                 document.getElementById('hud').classList.remove('hud-hidden');
                 document.getElementById('audio-list').innerHTML =
@@ -1039,7 +1039,8 @@
                 document.getElementById('total-time').textContent = fmtTime(video.duration || 0);
                 state.hasVideo = true;
                 updateScreenMasking(video.videoWidth / video.videoHeight, videoTexture);
-                video.play().catch(() => {});
+                // Auto-play
+                video.play().catch(e => console.warn('Auto-play blocked:', e));
                 document.getElementById('welcome-screen').style.display = 'none';
                 document.getElementById('hud').classList.remove('hud-hidden');
                 if (onLoaded) onLoaded();
@@ -1206,7 +1207,7 @@
         function buildCurtains(scene) {
             const g = new THREE.Group();
             const cm = new THREE.MeshStandardMaterial({ color: 0x1a0005, roughness: 0.98, side: THREE.DoubleSide });
-            const tm = new THREE.MeshStandardMaterial({ color: 0xd4af37, emissive: 0xd4af37, emissiveIntensity: 0.15,
+            const tm = new THREE.MeshStandardMaterial({ color: 0xd4af37, emissive: 0xd4af37, emissiveIntensity: 0.1,
                 roughness: 0.3, metalness: 0.7 });
             const mkCurt = (xPos) => {
                 const geo = new THREE.PlaneGeometry(16, ROOM_H, 64, 1);
@@ -1233,7 +1234,7 @@
             scene.add(g);
         }
 
-        // ── Room (High Quality) ──
+        // ── Room ──
         function buildRoom(scene) {
             const g = new THREE.Group();
 
@@ -1385,7 +1386,7 @@
             scene.add(g);
         }
 
-        // ── Seats (Premium Quality) ──
+        // ── Seats ──
         function buildSeats(scene) {
             const g = new THREE.Group();
 
@@ -1643,7 +1644,7 @@
             scene.add(g);
         }
 
-        // ── Wall Text: "Made with 💕 by Sandeep" (BIG, above frames) ──
+        // ── Wall Text: "Made with 💕 by Sandeep" - WHITE, BIG, LOW HEIGHT, LESS GLOW ──
         function createWallText(scene) {
             const text = 'Made with 💕 by Sandeep';
 
@@ -1656,47 +1657,41 @@
 
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.font = 'bold 140px "Bebas Neue", "Inter", sans-serif';
+                ctx.font = 'bold 120px "Bebas Neue", "Inter", sans-serif';
 
-                // Shadow for depth
-                ctx.shadowColor = 'rgba(0,0,0,0.8)';
-                ctx.shadowBlur = 40;
-                ctx.shadowOffsetX = 6;
-                ctx.shadowOffsetY = 6;
-                ctx.fillStyle = '#8a6a20';
-                ctx.fillText(text, canvas.width / 2 + 6, canvas.height / 2 + 6);
+                // Subtle shadow (less glow)
+                ctx.shadowColor = 'rgba(0,0,0,0.5)';
+                ctx.shadowBlur = 15;
+                ctx.shadowOffsetX = 3;
+                ctx.shadowOffsetY = 3;
+                ctx.fillStyle = '#ffffff';
+                ctx.fillText(text, canvas.width / 2 + 3, canvas.height / 2 + 3);
 
-                // Gold gradient with glow
-                ctx.shadowColor = '#d4af37';
-                ctx.shadowBlur = 80;
+                // White text with slight warm tint
+                ctx.shadowColor = 'rgba(255,255,255,0.15)';
+                ctx.shadowBlur = 20;
                 ctx.shadowOffsetX = 0;
                 ctx.shadowOffsetY = 0;
-                const grad = ctx.createLinearGradient(0, 0, canvas.width, 0);
-                grad.addColorStop(0, '#c4a030');
-                grad.addColorStop(0.3, '#f0d080');
-                grad.addColorStop(0.5, '#d4af37');
-                grad.addColorStop(0.7, '#f0d080');
-                grad.addColorStop(1, '#c4a030');
-                ctx.fillStyle = grad;
+                ctx.fillStyle = '#ffffff';
                 ctx.fillText(text, canvas.width / 2, canvas.height / 2);
 
-                // Inner highlight
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = 'rgba(255,255,200,0.5)';
-                ctx.fillStyle = 'rgba(255,248,220,0.2)';
-                ctx.fillText(text, canvas.width / 2 - 2, canvas.height / 2 - 2);
+                // Subtle edge highlight
+                ctx.shadowBlur = 5;
+                ctx.shadowColor = 'rgba(200,200,200,0.1)';
+                ctx.fillStyle = 'rgba(255,255,255,0.95)';
+                ctx.fillText(text, canvas.width / 2, canvas.height / 2);
 
-                // Sharp edge
+                // Sharp final pass
                 ctx.shadowBlur = 0;
                 ctx.shadowColor = 'transparent';
-                ctx.fillStyle = '#d4af37';
+                ctx.fillStyle = '#ffffff';
                 ctx.fillText(text, canvas.width / 2, canvas.height / 2);
 
-                // Decorative stars
-                ctx.font = '80px "Inter", sans-serif';
-                ctx.shadowBlur = 40;
-                ctx.shadowColor = '#d4af37';
-                ctx.fillStyle = '#d4af37';
+                // Small decorative stars (subtle)
+                ctx.font = '50px "Inter", sans-serif';
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = 'rgba(255,255,255,0.1)';
+                ctx.fillStyle = 'rgba(255,255,255,0.4)';
                 ctx.fillText('✦', canvas.width * 0.04, canvas.height / 2);
                 ctx.fillText('✦', canvas.width * 0.96, canvas.height / 2);
 
@@ -1715,42 +1710,43 @@
                 depthWrite: false,
                 blending: THREE.NormalBlending
             });
-            const geo = new THREE.PlaneGeometry(16, 3.2); // bigger
+            // Bigger size
+            const geo = new THREE.PlaneGeometry(18, 3.6);
             const meshL = new THREE.Mesh(geo, mat);
-            // Position above the frames: Y at ROOM_H - 2 (top of wall)
-            meshL.position.set(-ROOM_W / 2 + 0.15, ROOM_H - 2.2, 0);
+            // LOW HEIGHT - bottom area of wall
+            meshL.position.set(-ROOM_W / 2 + 0.15, 2.5, 0);
             meshL.rotation.y = Math.PI / 2;
             scene.add(meshL);
 
             const meshR = new THREE.Mesh(geo.clone(), mat);
-            meshR.position.set(ROOM_W / 2 - 0.15, ROOM_H - 2.2, 0);
+            meshR.position.set(ROOM_W / 2 - 0.15, 2.5, 0);
             meshR.rotation.y = -Math.PI / 2;
             scene.add(meshR);
 
-            // Soft glow lights
-            const glowL = new THREE.PointLight(0xd4af37, 1.0, 16);
-            glowL.position.set(-ROOM_W / 2 + 2, ROOM_H - 2.2, 0);
+            // Very subtle glow lights (minimal)
+            const glowL = new THREE.PointLight(0xffffff, 0.2, 8);
+            glowL.position.set(-ROOM_W / 2 + 2, 2.5, 0);
             scene.add(glowL);
-            const glowR = new THREE.PointLight(0xd4af37, 1.0, 16);
-            glowR.position.set(ROOM_W / 2 - 2, ROOM_H - 2.2, 0);
+            const glowR = new THREE.PointLight(0xffffff, 0.2, 8);
+            glowR.position.set(ROOM_W / 2 - 2, 2.5, 0);
             scene.add(glowR);
 
-            // Floating particles
-            const particleCount = 100;
+            // Few subtle particles
+            const particleCount = 30;
             const particleGeo = new THREE.BufferGeometry();
             const positions = new Float32Array(particleCount * 3);
             for (let i = 0; i < particleCount; i++) {
                 const side = i < particleCount / 2 ? -1 : 1;
-                positions[i * 3] = side * (ROOM_W / 2 - 0.5) + (Math.random() - 0.5) * 4;
-                positions[i * 3 + 1] = ROOM_H - 2.2 + (Math.random() - 0.5) * 2.5;
-                positions[i * 3 + 2] = (Math.random() - 0.5) * 10;
+                positions[i * 3] = side * (ROOM_W / 2 - 0.5) + (Math.random() - 0.5) * 3;
+                positions[i * 3 + 1] = 2.5 + (Math.random() - 0.5) * 1.5;
+                positions[i * 3 + 2] = (Math.random() - 0.5) * 6;
             }
             particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
             const particleMat = new THREE.PointsMaterial({
-                size: 0.06,
-                color: 0xd4af37,
+                size: 0.04,
+                color: 0xffffff,
                 transparent: true,
-                opacity: 0.5,
+                opacity: 0.3,
                 blending: THREE.AdditiveBlending,
                 depthWrite: false
             });
@@ -1760,28 +1756,22 @@
             return { meshL, meshR, particles, glowL, glowR };
         }
 
-        // ── Picture Frames (Portrait 9:16, with spotlights) ──
+        // ── Picture Frames — HORIZONTAL (parallel), BOTTOM AREA ──
         function createPictureFrames(scene) {
             const group = new THREE.Group();
 
-            // Portrait 9:16 => width smaller, height larger
+            // Portrait 9:16
             const frameW = 1.8;
             const frameH = 3.2;
             const frameDepth = 0.08;
             const border = 0.15;
 
-            // Dark frame
             const frameMat = new THREE.MeshStandardMaterial({
                 color: 0x0a0505,
                 roughness: 0.5,
                 metalness: 0.05,
                 emissive: 0x0a0505,
                 emissiveIntensity: 0.02
-            });
-            const innerMat = new THREE.MeshStandardMaterial({
-                color: 0x1a1010,
-                roughness: 0.6,
-                metalness: 0.02
             });
 
             function createPlaceholderTexture() {
@@ -1805,7 +1795,7 @@
                 ctx.fillText('🖼', c.width / 2, c.height / 2 - 10);
                 ctx.font = '28px "Inter", sans-serif';
                 ctx.fillStyle = '#3a2a2a';
-                ctx.fillText('Photo Frame', c.width / 2, c.height / 2 + 60);
+                ctx.fillText('Photo', c.width / 2, c.height / 2 + 60);
                 const tex = new THREE.CanvasTexture(c);
                 tex.anisotropy = 4;
                 return tex;
@@ -1816,7 +1806,6 @@
             function createFrame(posX, posY, posZ, rotY, imageUrl = null) {
                 const fg = new THREE.Group();
 
-                // Back panel
                 const backMat = new THREE.MeshStandardMaterial({
                     map: placeholderTex,
                     roughness: 0.7,
@@ -1840,7 +1829,6 @@
                     );
                 }
 
-                // Frame border (4 bars)
                 const barGeo = (w, h) => new THREE.BoxGeometry(w, h, frameDepth);
                 const top = new THREE.Mesh(barGeo(frameW, border), frameMat);
                 top.position.set(0, frameH / 2 - border / 2, 0);
@@ -1855,64 +1843,36 @@
                 right.position.set(frameW / 2 - border / 2, 0, 0);
                 fg.add(right);
 
-                // Inner bevel (slightly lighter)
-                const bevelMat = new THREE.MeshStandardMaterial({
-                    color: 0x1a1010,
-                    roughness: 0.4,
-                    metalness: 0.05
-                });
-                const bevelGeo = (w, h) => new THREE.BoxGeometry(w, h, 0.02);
-                const bTop = new THREE.Mesh(bevelGeo(frameW - 0.02, border - 0.02), bevelMat);
-                bTop.position.set(0, frameH / 2 - border / 2, frameDepth / 2 + 0.01);
-                fg.add(bTop);
-                const bBottom = new THREE.Mesh(bevelGeo(frameW - 0.02, border - 0.02), bevelMat);
-                bBottom.position.set(0, -frameH / 2 + border / 2, frameDepth / 2 + 0.01);
-                fg.add(bBottom);
-                const bLeft = new THREE.Mesh(bevelGeo(border - 0.02, frameH - border * 2 - 0.02), bevelMat);
-                bLeft.position.set(-frameW / 2 + border / 2, 0, frameDepth / 2 + 0.01);
-                fg.add(bLeft);
-                const bRight = new THREE.Mesh(bevelGeo(border - 0.02, frameH - border * 2 - 0.02), bevelMat);
-                bRight.position.set(frameW / 2 - border / 2, 0, frameDepth / 2 + 0.01);
-                fg.add(bRight);
-
                 fg.position.set(posX, posY, posZ);
                 fg.rotation.y = rotY;
 
-                // ── Spotlight for this frame ──
-                const spotLight = new THREE.SpotLight(0xffeedd, 0.8, 8, Math.PI / 8, 0.5, 1.5);
-                spotLight.position.set(posX + (rotY === Math.PI / 2 ? -0.5 : 0.5), posY + 2.5, posZ + 0.5);
+                // Spotlight
+                const spotLight = new THREE.SpotLight(0xffeedd, 0.9, 7, Math.PI / 8, 0.5, 1.5);
+                spotLight.position.set(posX + (rotY === Math.PI / 2 ? -0.6 : 0.6), posY + 2.2, posZ + 0.5);
                 spotLight.target.position.set(posX, posY, posZ);
                 scene.add(spotLight);
                 scene.add(spotLight.target);
 
-                // Also add a small point light for fill
-                const fillLight = new THREE.PointLight(0xffddaa, 0.2, 4);
+                const fillLight = new THREE.PointLight(0xffddaa, 0.15, 3);
                 fillLight.position.set(posX + (rotY === Math.PI / 2 ? -0.3 : 0.3), posY, posZ + 0.3);
                 scene.add(fillLight);
 
-                // Store reference on the group for later if needed
                 fg.userData = { spotLight, fillLight };
 
                 return fg;
             }
 
-            // Place frames: 3 per side, vertically stacked
-            // Y positions: evenly spaced from bottom to below the text
-            const yStart = 2.5;
-            const yEnd = ROOM_H - 4.0; // leave space for text above
-            const yPositions = [];
-            for (let i = 0; i < 3; i++) {
-                const t = (i + 0.5) / 3;
-                yPositions.push(yStart + t * (yEnd - yStart));
-            }
-            // z positions: spread along the wall
-            const zPositions = [-4, 0, 4];
+            // ── HORIZONTAL PLACEMENT: 3 frames side by side at bottom ──
+            // Bottom area: Y around 2.0 (low)
+            const frameY = 2.2;
+            // Z positions spread horizontally along the wall
+            const zPositions = [-5, 0, 5];
 
-            // Left wall
+            // Left wall: 3 frames in a horizontal row
             for (let i = 0; i < 3; i++) {
                 const frame = createFrame(
                     -ROOM_W / 2 + 0.2,
-                    yPositions[i],
+                    frameY,
                     zPositions[i],
                     Math.PI / 2,
                     `wallpapers/photo${i+1}.jpg`
@@ -1920,11 +1880,11 @@
                 group.add(frame);
             }
 
-            // Right wall
+            // Right wall: 3 frames in a horizontal row
             for (let i = 0; i < 3; i++) {
                 const frame = createFrame(
                     ROOM_W / 2 - 0.2,
-                    yPositions[i],
+                    frameY,
                     zPositions[i],
                     -Math.PI / 2,
                     `wallpapers/photo${i+4}.jpg`
@@ -2037,8 +1997,6 @@
         let positionalAudio = null;
         let sourceNode = null;
         let gainNode = null;
-        let reverbNode = null;
-        let reverbGainNode = null;
         let surroundSpeakers = [];
 
         function createImpulseResponse(duration, decay, ctx) {
@@ -2062,7 +2020,9 @@
                 camera.add(audioListener);
                 const ctx = audioListener.context;
 
-                if (ctx.state === 'suspended') { ctx.resume(); }
+                if (ctx.state === 'suspended') {
+                    ctx.resume().catch(e => console.warn('Audio resume failed:', e));
+                }
 
                 audioCtx = ctx;
                 mainVideo = video;
@@ -2166,8 +2126,8 @@
 
                     const convolver = ctx.createConvolver();
                     convolver.buffer = createImpulseResponse(2.5, 3.5, ctx);
-                    reverbNode = convolver;
-                    reverbGainNode = ctx.createGain();
+
+                    const reverbGainNode = ctx.createGain();
                     reverbGainNode.gain.value = 0.08;
 
                     const reverbMix = ctx.createGain();
@@ -2195,6 +2155,13 @@
                 audioInitialized = true;
                 console.log('🎵 3D Audio System initialized');
 
+                // Resume audio context on user gesture
+                document.addEventListener('click', () => {
+                    if (audioListener && audioListener.context && audioListener.context.state === 'suspended') {
+                        audioListener.context.resume();
+                    }
+                }, { once: false });
+
             } catch (e) {
                 console.warn('Audio init failed:', e);
                 audioInitialized = false;
@@ -2221,7 +2188,7 @@
 
         function resumeAudio() {
             if (audioListener && audioListener.context && audioListener.context.state === 'suspended') {
-                audioListener.context.resume();
+                audioListener.context.resume().catch(e => console.warn('Resume failed:', e));
             }
         }
 
@@ -2237,7 +2204,7 @@
             });
             composer = new EffectComposer(renderer, rt);
             composer.addPass(new RenderPass(scene, camera));
-            bloomPass = new UnrealBloomPass(sz, 0.2, 0.4, 0.8);
+            bloomPass = new UnrealBloomPass(sz, 0.15, 0.3, 0.7);
             composer.addPass(bloomPass);
             const outputPass = new OutputPass();
             composer.addPass(outputPass);
@@ -2316,14 +2283,35 @@
             document.addEventListener('mousemove', () => { if (state.hasVideo) showHUD(); });
             document.addEventListener('touchstart', () => { if (state.hasVideo) showHUD(); }, { passive: true });
 
+            // ── FIX: Play/Pause ──
             function togglePlay() {
-                if (!state.hasVideo) return;
+                if (!state.hasVideo) {
+                    // If no video loaded, try loading default
+                    if (DEFAULT_VIDEO_URL) {
+                        initAudio(camera, scene, video);
+                        loadDefaultVideo();
+                        setTimeout(() => togglePlay(), 300);
+                    }
+                    return;
+                }
                 initAudio(camera, scene, video);
                 resumeAudio();
-                if (video.paused) video.play();
-                else video.pause();
+                if (video.paused) {
+                    video.play().catch(e => {
+                        console.warn('Play failed:', e);
+                        // Try resuming audio context first
+                        if (audioListener && audioListener.context) {
+                            audioListener.context.resume().then(() => {
+                                video.play().catch(e2 => showErr('Cannot play video.'));
+                            });
+                        }
+                    });
+                } else {
+                    video.pause();
+                }
             }
 
+            // ── Video event listeners ──
             video.addEventListener('play', () => {
                 document.getElementById('play-icon').style.display = 'none';
                 document.getElementById('pause-icon').style.display = 'block';
@@ -2354,6 +2342,7 @@
                 document.getElementById('buffering-overlay').style.display = 'none';
             });
 
+            // ── Seek Bar ──
             const seekBar = document.getElementById('seek-bar');
             const seekProg = document.getElementById('seek-progress');
             const seekBuf = document.getElementById('seek-buffered');
@@ -2384,6 +2373,7 @@
                 }
             });
 
+            // ── Volume ──
             const volBar = document.getElementById('volume-bar');
             volBar.addEventListener('input', () => {
                 video.volume = volBar.value / 100;
@@ -2430,6 +2420,7 @@
                 document.getElementById('lights-btn').classList.toggle('active', lightsOn);
             }
 
+            // ── Button listeners ──
             document.getElementById('play-btn').addEventListener('click', togglePlay);
             document.getElementById('seek-back-btn').addEventListener('click', () => {
                 video.currentTime = Math.max(0, video.currentTime - 10);
@@ -2470,7 +2461,7 @@
                 });
             }
 
-            // Movie Grid
+            // ── Movie Grid ──
             const movieGrid = document.getElementById('movie-grid');
             if (movieGrid) {
                 fetch('http://localhost:3000/api/movies')
@@ -2505,7 +2496,7 @@
                     });
             }
 
-            // Upload
+            // ── Upload ──
             const fileInput = document.getElementById('file-input');
             const uploadBtn = document.getElementById('upload-btn');
             const dropZone = document.getElementById('drop-zone');
@@ -2527,7 +2518,7 @@
                 }
             });
 
-            // Keyboard
+            // ── Keyboard shortcuts ──
             document.addEventListener('keydown', e => {
                 if (['INPUT', 'SELECT', 'TEXTAREA'].includes(e.target.tagName)) return;
                 switch (e.key) {
@@ -2570,7 +2561,7 @@
                 }
             });
 
-            // Loading
+            // ── Loading sequence ──
             const bar = document.getElementById('loading-bar'),
                 ls = document.getElementById('loading-screen');
             let pct = 0;
@@ -2585,7 +2576,7 @@
                         setTimeout(() => {
                             ls.style.display = 'none';
                             document.getElementById('welcome-screen').style.display = 'flex';
-                            // After welcome screen appears, load default video if no file loaded yet
+                            // Load default video after welcome screen appears
                             if (!state.hasVideo && DEFAULT_VIDEO_URL) {
                                 setTimeout(() => {
                                     initAudio(camera, scene, video);
@@ -2630,10 +2621,10 @@
         const lights = buildLighting(scene);
         buildBeam(scene);
 
-        // ── Add Wall Text ──
+        // ── Add Wall Text (White, Big, Low, Less Glow) ──
         createWallText(scene);
 
-        // ── Add Large Portrait Picture Frames with Spotlights ──
+        // ── Add Picture Frames (Horizontal / Parallel, Bottom Area) ──
         createPictureFrames(scene);
 
         const post = initPost(renderer, scene, camera);
@@ -2687,6 +2678,8 @@
         console.log('✦ Premium IMAX Cinema (3D Audio) loaded successfully!');
         console.log('💕 Made with 💕 by Sandeep');
         console.log('🎵 3D Positional Audio active — sound changes as you move!');
+        console.log('📸 Photo frames: Horizontal (parallel) at bottom area');
+        console.log('⚪ Text: White, big, low height, minimal glow');
     </script>
 </body>
 </html>
