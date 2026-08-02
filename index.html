@@ -900,6 +900,12 @@
     </div>
 
     <script type="module">
+        // ── CONFIG ────────────────────────────────────────────────────────────
+        // Set a default video URL (direct MP4 link) – change this to your own link
+        const DEFAULT_VIDEO_URL = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+        // If you want to use a YouTube video, you need to extract a direct MP4 link or use a proxy.
+        // For Google Drive, use a direct download link: https://drive.google.com/uc?export=download&id=FILE_ID
+
         // ── Imports ──
         import * as THREE from 'three';
         import { RectAreaLightUniformsLib } from 'three/addons/lights/RectAreaLightUniformsLib.js';
@@ -997,6 +1003,7 @@
             glowLight.color.set(col);
         }
 
+        // ── Load functions ──
         function loadVideoFile(file) {
             const url = URL.createObjectURL(file);
             video.src = url;
@@ -1014,7 +1021,6 @@
                     '<span style="color:var(--text-dim);">Not available</span>';
                 document.getElementById('sub-list').innerHTML =
                     '<span style="color:var(--text-dim);">Not available</span>';
-                // Re-init audio with new video source
                 if (audioInitialized && audioCtx) {
                     reconnectAudio(video);
                 }
@@ -1044,6 +1050,12 @@
             video.addEventListener('error', () => {
                 showErr('Cannot play this format.');
             }, { once: true });
+        }
+
+        function loadDefaultVideo() {
+            if (DEFAULT_VIDEO_URL) {
+                loadVideoUrl(DEFAULT_VIDEO_URL, 'Default Video', () => {});
+            }
         }
 
         function loadSubtitleTrack(url) {
@@ -1240,7 +1252,6 @@
                     ctx.fillStyle = `rgb(${r},${g2},${b2})`;
                     ctx.fillRect(x, y, 1 + Math.random() * 2, 1 + Math.random() * 2);
                 }
-                // Subtle pattern
                 ctx.strokeStyle = 'rgba(212,175,55,0.03)';
                 ctx.lineWidth = 1;
                 for (let x = 0; x < size; x += 20) {
@@ -1267,7 +1278,6 @@
             floor.position.set(0, 0, 0);
             g.add(floor);
 
-            // Dark wood walls with subtle texture
             const wallMat = new THREE.MeshStandardMaterial({
                 color: 0x0d0808,
                 roughness: 0.7,
@@ -1288,14 +1298,12 @@
             mkWall(ROOM_W, ROOM_H, 0, cy, ROOM_D / 2, Math.PI);
             mkWall(ROOM_W, ROOM_H, 0, cy, -ROOM_D / 2, 0);
 
-            // Front face above screen
             const fh = ROOM_H - SCR_H - 1.5;
             const tf = new THREE.Mesh(new THREE.PlaneGeometry(ROOM_W, fh),
                 new THREE.MeshStandardMaterial({ color: 0x0a0505, roughness: 1 }));
             tf.position.set(0, SCR_Y + SCR_H / 2 + fh / 2 + 0.08, SCR_Z + 0.01);
             g.add(tf);
 
-            // Decorative wall panels with dark trim (no gold border)
             const panelMat = new THREE.MeshStandardMaterial({
                 color: 0x1a0a0a,
                 roughness: 0.85,
@@ -1328,7 +1336,6 @@
                 }
             }
 
-            // Acoustic ceiling
             const acMat = new THREE.MeshStandardMaterial({ color: 0x0a0505, roughness: 1.0 });
             const acGeo = new THREE.BoxGeometry(2.0, 0.12, 2.0);
             const acIM = new THREE.InstancedMesh(acGeo, acMat, 500);
@@ -1345,7 +1352,6 @@
             acIM.instanceMatrix.needsUpdate = true;
             g.add(acIM);
 
-            // Crown moulding - dark
             const crownMat = new THREE.MeshStandardMaterial({
                 color: 0x1a1010,
                 roughness: 0.5,
@@ -1362,7 +1368,6 @@
             cr(ROOM_D, 0.3, -ROOM_W / 2 + 0.15, ROOM_H - 0.06, 0, Math.PI / 2);
             cr(ROOM_D, 0.3, ROOM_W / 2 - 0.15, ROOM_H - 0.06, 0, Math.PI / 2);
 
-            // Baseboard - dark
             const baseMat = new THREE.MeshStandardMaterial({
                 color: 0x1a1010,
                 roughness: 0.5,
@@ -1573,7 +1578,6 @@
             aisle.position.set(0, 0.0, SCR_Z + 7 + aisleLength / 2);
             g.add(aisle);
 
-            // Warm LED strips
             const ledMat = new THREE.MeshBasicMaterial({ color: 0xffaa44 });
             const ledMat2 = new THREE.MeshBasicMaterial({ color: 0xff8844 });
             const ledGeo = new THREE.BoxGeometry(0.06, 0.02, aisleLength);
@@ -1639,11 +1643,10 @@
             scene.add(g);
         }
 
-        // ── Wall Text: "Made with 💕 by Sandeep" (Large, Gold, 3D) ──
+        // ── Wall Text: "Made with 💕 by Sandeep" (BIG, above frames) ──
         function createWallText(scene) {
             const text = 'Made with 💕 by Sandeep';
 
-            // Create high-res texture with 3D effect
             function makeTextTexture() {
                 const canvas = document.createElement('canvas');
                 canvas.width = 2048;
@@ -1653,19 +1656,19 @@
 
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.font = 'bold 120px "Bebas Neue", "Inter", sans-serif';
+                ctx.font = 'bold 140px "Bebas Neue", "Inter", sans-serif';
 
-                // Deep shadow for 3D effect
+                // Shadow for depth
                 ctx.shadowColor = 'rgba(0,0,0,0.8)';
-                ctx.shadowBlur = 30;
-                ctx.shadowOffsetX = 4;
-                ctx.shadowOffsetY = 4;
+                ctx.shadowBlur = 40;
+                ctx.shadowOffsetX = 6;
+                ctx.shadowOffsetY = 6;
                 ctx.fillStyle = '#8a6a20';
-                ctx.fillText(text, canvas.width / 2 + 4, canvas.height / 2 + 4);
+                ctx.fillText(text, canvas.width / 2 + 6, canvas.height / 2 + 6);
 
-                // Main gold with glow
+                // Gold gradient with glow
                 ctx.shadowColor = '#d4af37';
-                ctx.shadowBlur = 60;
+                ctx.shadowBlur = 80;
                 ctx.shadowOffsetX = 0;
                 ctx.shadowOffsetY = 0;
                 const grad = ctx.createLinearGradient(0, 0, canvas.width, 0);
@@ -1678,9 +1681,9 @@
                 ctx.fillText(text, canvas.width / 2, canvas.height / 2);
 
                 // Inner highlight
-                ctx.shadowBlur = 10;
+                ctx.shadowBlur = 15;
                 ctx.shadowColor = 'rgba(255,255,200,0.5)';
-                ctx.fillStyle = 'rgba(255,248,220,0.3)';
+                ctx.fillStyle = 'rgba(255,248,220,0.2)';
                 ctx.fillText(text, canvas.width / 2 - 2, canvas.height / 2 - 2);
 
                 // Sharp edge
@@ -1690,12 +1693,12 @@
                 ctx.fillText(text, canvas.width / 2, canvas.height / 2);
 
                 // Decorative stars
-                ctx.font = '70px "Inter", sans-serif';
-                ctx.shadowBlur = 30;
+                ctx.font = '80px "Inter", sans-serif';
+                ctx.shadowBlur = 40;
                 ctx.shadowColor = '#d4af37';
                 ctx.fillStyle = '#d4af37';
-                ctx.fillText('✦', canvas.width * 0.05, canvas.height / 2);
-                ctx.fillText('✦', canvas.width * 0.95, canvas.height / 2);
+                ctx.fillText('✦', canvas.width * 0.04, canvas.height / 2);
+                ctx.fillText('✦', canvas.width * 0.96, canvas.height / 2);
 
                 const tex = new THREE.CanvasTexture(canvas);
                 tex.minFilter = THREE.LinearFilter;
@@ -1712,41 +1715,42 @@
                 depthWrite: false,
                 blending: THREE.NormalBlending
             });
-            const geo = new THREE.PlaneGeometry(14, 2.8);
+            const geo = new THREE.PlaneGeometry(16, 3.2); // bigger
             const meshL = new THREE.Mesh(geo, mat);
-            meshL.position.set(-ROOM_W / 2 + 0.15, ROOM_H / 2 + 0.5, 0);
+            // Position above the frames: Y at ROOM_H - 2 (top of wall)
+            meshL.position.set(-ROOM_W / 2 + 0.15, ROOM_H - 2.2, 0);
             meshL.rotation.y = Math.PI / 2;
             scene.add(meshL);
 
             const meshR = new THREE.Mesh(geo.clone(), mat);
-            meshR.position.set(ROOM_W / 2 - 0.15, ROOM_H / 2 + 0.5, 0);
+            meshR.position.set(ROOM_W / 2 - 0.15, ROOM_H - 2.2, 0);
             meshR.rotation.y = -Math.PI / 2;
             scene.add(meshR);
 
             // Soft glow lights
-            const glowL = new THREE.PointLight(0xd4af37, 0.6, 14);
-            glowL.position.set(-ROOM_W / 2 + 1.5, ROOM_H / 2 + 0.5, 0);
+            const glowL = new THREE.PointLight(0xd4af37, 1.0, 16);
+            glowL.position.set(-ROOM_W / 2 + 2, ROOM_H - 2.2, 0);
             scene.add(glowL);
-            const glowR = new THREE.PointLight(0xd4af37, 0.6, 14);
-            glowR.position.set(ROOM_W / 2 - 1.5, ROOM_H / 2 + 0.5, 0);
+            const glowR = new THREE.PointLight(0xd4af37, 1.0, 16);
+            glowR.position.set(ROOM_W / 2 - 2, ROOM_H - 2.2, 0);
             scene.add(glowR);
 
             // Floating particles
-            const particleCount = 80;
+            const particleCount = 100;
             const particleGeo = new THREE.BufferGeometry();
             const positions = new Float32Array(particleCount * 3);
             for (let i = 0; i < particleCount; i++) {
                 const side = i < particleCount / 2 ? -1 : 1;
-                positions[i * 3] = side * (ROOM_W / 2 - 0.5) + (Math.random() - 0.5) * 3;
-                positions[i * 3 + 1] = ROOM_H / 2 + 0.5 + (Math.random() - 0.5) * 4;
-                positions[i * 3 + 2] = (Math.random() - 0.5) * 8;
+                positions[i * 3] = side * (ROOM_W / 2 - 0.5) + (Math.random() - 0.5) * 4;
+                positions[i * 3 + 1] = ROOM_H - 2.2 + (Math.random() - 0.5) * 2.5;
+                positions[i * 3 + 2] = (Math.random() - 0.5) * 10;
             }
             particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
             const particleMat = new THREE.PointsMaterial({
-                size: 0.05,
+                size: 0.06,
                 color: 0xd4af37,
                 transparent: true,
-                opacity: 0.6,
+                opacity: 0.5,
                 blending: THREE.AdditiveBlending,
                 depthWrite: false
             });
@@ -1756,16 +1760,17 @@
             return { meshL, meshR, particles, glowL, glowR };
         }
 
-        // ── Large Picture Frames (No Gold Border) ──
+        // ── Picture Frames (Portrait 9:16, with spotlights) ──
         function createPictureFrames(scene) {
             const group = new THREE.Group();
 
-            const frameW = 3.6,
-                frameH = 2.8;
+            // Portrait 9:16 => width smaller, height larger
+            const frameW = 1.8;
+            const frameH = 3.2;
             const frameDepth = 0.08;
             const border = 0.15;
 
-            // Dark frame material (no gold)
+            // Dark frame
             const frameMat = new THREE.MeshStandardMaterial({
                 color: 0x0a0505,
                 roughness: 0.5,
@@ -1773,7 +1778,6 @@
                 emissive: 0x0a0505,
                 emissiveIntensity: 0.02
             });
-            // Slightly lighter inner bevel
             const innerMat = new THREE.MeshStandardMaterial({
                 color: 0x1a1010,
                 roughness: 0.6,
@@ -1787,7 +1791,6 @@
                 const ctx = c.getContext('2d');
                 ctx.fillStyle = '#0a0505';
                 ctx.fillRect(0, 0, c.width, c.height);
-                // Film grain
                 for (let i = 0; i < 5000; i++) {
                     const x = Math.random() * c.width,
                         y = Math.random() * c.height;
@@ -1795,7 +1798,6 @@
                     ctx.fillStyle = `rgba(${v},${v},${v},0.3)`;
                     ctx.fillRect(x, y, 1, 1);
                 }
-                // Center icon
                 ctx.fillStyle = '#2a1a1a';
                 ctx.font = '80px "Inter", sans-serif';
                 ctx.textAlign = 'center';
@@ -1814,7 +1816,7 @@
             function createFrame(posX, posY, posZ, rotY, imageUrl = null) {
                 const fg = new THREE.Group();
 
-                // Back panel (image area)
+                // Back panel
                 const backMat = new THREE.MeshStandardMaterial({
                     map: placeholderTex,
                     roughness: 0.7,
@@ -1825,7 +1827,6 @@
                 backMesh.position.z = -frameDepth / 2 + 0.001;
                 fg.add(backMesh);
 
-                // Try to load image
                 if (imageUrl) {
                     const loader = new THREE.TextureLoader();
                     loader.load(imageUrl,
@@ -1839,7 +1840,7 @@
                     );
                 }
 
-                // Frame border (4 bars) - dark, no gold
+                // Frame border (4 bars)
                 const barGeo = (w, h) => new THREE.BoxGeometry(w, h, frameDepth);
                 const top = new THREE.Mesh(barGeo(frameW, border), frameMat);
                 top.position.set(0, frameH / 2 - border / 2, 0);
@@ -1854,7 +1855,7 @@
                 right.position.set(frameW / 2 - border / 2, 0, 0);
                 fg.add(right);
 
-                // Inner bevel
+                // Inner bevel (slightly lighter)
                 const bevelMat = new THREE.MeshStandardMaterial({
                     color: 0x1a1010,
                     roughness: 0.4,
@@ -1876,12 +1877,36 @@
 
                 fg.position.set(posX, posY, posZ);
                 fg.rotation.y = rotY;
+
+                // ── Spotlight for this frame ──
+                const spotLight = new THREE.SpotLight(0xffeedd, 0.8, 8, Math.PI / 8, 0.5, 1.5);
+                spotLight.position.set(posX + (rotY === Math.PI / 2 ? -0.5 : 0.5), posY + 2.5, posZ + 0.5);
+                spotLight.target.position.set(posX, posY, posZ);
+                scene.add(spotLight);
+                scene.add(spotLight.target);
+
+                // Also add a small point light for fill
+                const fillLight = new THREE.PointLight(0xffddaa, 0.2, 4);
+                fillLight.position.set(posX + (rotY === Math.PI / 2 ? -0.3 : 0.3), posY, posZ + 0.3);
+                scene.add(fillLight);
+
+                // Store reference on the group for later if needed
+                fg.userData = { spotLight, fillLight };
+
                 return fg;
             }
 
-            // Big frames on side walls - 3 per side
-            const yPositions = [ROOM_H * 0.78, ROOM_H * 0.48, ROOM_H * 0.18];
-            const zPositions = [-6, 0, 6];
+            // Place frames: 3 per side, vertically stacked
+            // Y positions: evenly spaced from bottom to below the text
+            const yStart = 2.5;
+            const yEnd = ROOM_H - 4.0; // leave space for text above
+            const yPositions = [];
+            for (let i = 0; i < 3; i++) {
+                const t = (i + 0.5) / 3;
+                yPositions.push(yStart + t * (yEnd - yStart));
+            }
+            // z positions: spread along the wall
+            const zPositions = [-4, 0, 4];
 
             // Left wall
             for (let i = 0; i < 3; i++) {
@@ -1991,7 +2016,6 @@
                 scene.add(s);
                 scene.add(s.target);
                 ceilSpots.push(s);
-                // Glow mesh
                 const glowMat = new THREE.MeshBasicMaterial({
                     color: 0xffddbb,
                     transparent: true,
@@ -2043,7 +2067,6 @@
                 audioCtx = ctx;
                 mainVideo = video;
 
-                // Master gain + compressor
                 const masterGain = ctx.createGain();
                 masterGain.gain.value = 1.0;
 
@@ -2054,13 +2077,11 @@
                 compressor.attack.value = 0.005;
                 compressor.release.value = 0.1;
 
-                // Connect to listener
                 audioListener.gain.disconnect();
                 audioListener.gain.connect(compressor);
                 compressor.connect(masterGain);
                 masterGain.connect(ctx.destination);
 
-                // ── Create Positional Audio at Screen Center ──
                 positionalAudio = new THREE.PositionalAudio(audioListener);
                 positionalAudio.setRefDistance(6);
                 positionalAudio.setRolloffFactor(1.2);
@@ -2068,7 +2089,6 @@
                 positionalAudio.position.set(0, SCR_Y, SCR_Z);
                 scene.add(positionalAudio);
 
-                // ── Surround Speakers ──
                 const speakerPositions = [
                     { x: -SCR_W / 2 - 3, y: SCR_Y, z: SCR_Z, label: 'FL' },
                     { x: SCR_W / 2 + 3, y: SCR_Y, z: SCR_Z, label: 'FR' },
@@ -2088,44 +2108,34 @@
                     surroundSpeakers.push(sp);
                 });
 
-                // ── Connect video to positional audio ──
                 try {
                     sourceNode = ctx.createMediaElementSource(video);
                     gainNode = ctx.createGain();
                     gainNode.gain.value = 1.0;
 
-                    // Connect to positional audio
                     sourceNode.connect(gainNode);
 
-                    // Split to positional audio and surround speakers
                     const splitter = ctx.createChannelSplitter(6);
                     gainNode.connect(splitter);
 
-                    // Connect each channel to corresponding speaker
-                    // Channel 0: Left → Front Left
                     const flGain = ctx.createGain();
                     flGain.gain.value = 0.8;
                     splitter.connect(flGain, 0);
-                    // Connect to positional audio (main source) and speaker
                     flGain.connect(positionalAudio.getNode());
 
-                    // Channel 1: Right → Front Right
                     const frGain = ctx.createGain();
                     frGain.gain.value = 0.8;
                     splitter.connect(frGain, 1);
                     frGain.connect(positionalAudio.getNode());
 
-                    // Channel 2: Center
                     const cGain = ctx.createGain();
                     cGain.gain.value = 1.0;
                     splitter.connect(cGain, 2);
                     cGain.connect(positionalAudio.getNode());
 
-                    // Channel 3: LFE (Sub)
                     const subGain = ctx.createGain();
                     subGain.gain.value = 0.6;
                     splitter.connect(subGain, 3);
-                    // Connect to surround speaker
                     if (surroundSpeakers[3]) {
                         const subFilter = ctx.createBiquadFilter();
                         subFilter.type = 'lowpass';
@@ -2134,7 +2144,6 @@
                         subFilter.connect(surroundSpeakers[3].getNode());
                     }
 
-                    // Channel 4: Surround Left
                     const slGain = ctx.createGain();
                     slGain.gain.value = 0.5;
                     splitter.connect(slGain, 4);
@@ -2145,7 +2154,6 @@
                         delay.connect(surroundSpeakers[4].getNode());
                     }
 
-                    // Channel 5: Surround Right
                     const srGain = ctx.createGain();
                     srGain.gain.value = 0.5;
                     splitter.connect(srGain, 5);
@@ -2156,14 +2164,12 @@
                         delay.connect(surroundSpeakers[5].getNode());
                     }
 
-                    // ── Reverb (Room Ambience) ──
                     const convolver = ctx.createConvolver();
                     convolver.buffer = createImpulseResponse(2.5, 3.5, ctx);
                     reverbNode = convolver;
                     reverbGainNode = ctx.createGain();
                     reverbGainNode.gain.value = 0.08;
 
-                    // Send some of each channel to reverb
                     const reverbMix = ctx.createGain();
                     reverbMix.gain.value = 0.3;
                     splitter.connect(reverbMix, 0);
@@ -2173,7 +2179,6 @@
                     convolver.connect(reverbGainNode);
                     reverbGainNode.connect(audioListener.getInput());
 
-                    // Also connect positional audio to reverb for ambiance
                     const paReverb = ctx.createGain();
                     paReverb.gain.value = 0.1;
                     gainNode.connect(paReverb);
@@ -2181,7 +2186,6 @@
 
                 } catch (e) {
                     console.warn('Audio connection error:', e);
-                    // Fallback: simple audio
                     try {
                         const fallback = ctx.createMediaElementSource(video);
                         fallback.connect(audioListener.getInput());
@@ -2200,11 +2204,9 @@
         function reconnectAudio(video) {
             if (!audioInitialized || !audioCtx) return;
             try {
-                // Clean up old connections
                 if (sourceNode) {
                     try { sourceNode.disconnect(); } catch (e) {}
                 }
-                // Create new connection
                 sourceNode = audioCtx.createMediaElementSource(video);
                 if (gainNode) {
                     sourceNode.connect(gainNode);
@@ -2458,7 +2460,6 @@
                     seatYawOffset = -0.39;
                     seatPitchOffset = 0.10;
                 }
-                // Audio position update is automatic with PositionalAudio
             });
 
             const subsBtn = document.getElementById('subs-btn');
@@ -2584,6 +2585,13 @@
                         setTimeout(() => {
                             ls.style.display = 'none';
                             document.getElementById('welcome-screen').style.display = 'flex';
+                            // After welcome screen appears, load default video if no file loaded yet
+                            if (!state.hasVideo && DEFAULT_VIDEO_URL) {
+                                setTimeout(() => {
+                                    initAudio(camera, scene, video);
+                                    loadDefaultVideo();
+                                }, 500);
+                            }
                         }, 1800);
                     }, 400);
                 }
@@ -2625,7 +2633,7 @@
         // ── Add Wall Text ──
         createWallText(scene);
 
-        // ── Add Large Picture Frames ──
+        // ── Add Large Portrait Picture Frames with Spotlights ──
         createPictureFrames(scene);
 
         const post = initPost(renderer, scene, camera);
@@ -2665,9 +2673,6 @@
             updateScreenGlow(lights.screenGlow);
             updateBeam(t);
             if (uiDeps.updateCamera) uiDeps.updateCamera();
-
-            // Update positional audio position (it moves with listener)
-            // The audio is already attached to the listener via PositionalAudio
 
             post.composer.render();
         }
